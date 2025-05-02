@@ -1,0 +1,3 @@
+https://austinmorlan.com/posts/entity_component_system/#what-is-an-ecs
+https://www.simplilearn.com/entity-component-system-introductory-guide-article
+https://indiegamedev.net/2020/05/19/an-entity-component-system-with-data-locality-in-cpp/
