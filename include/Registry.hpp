@@ -1,13 +1,9 @@
-#include "cstdint"
 #include "bitset"
-#include "array"
 #include "memory"
 #include "queue"
 #include "unordered_map"
 
 #include "ComponentArray.hpp"
-
-#include "raylib.h"
 
 using ComponentType = std::uint8_t;
 const ComponentType MAX_COMPONENTS = 16;
@@ -17,7 +13,6 @@ using Signature = std::bitset<MAX_COMPONENTS>;
 class Registry {
 public:
 	Registry();
-	~Registry();
 	//Returns new Entity
 	Entity CreateEntity();
 	//Destroys an entity and its components

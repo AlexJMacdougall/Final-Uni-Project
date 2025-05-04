@@ -13,11 +13,6 @@ Registry::Registry()
 	mNextComponentType = 0;
 }
 
-Registry::~Registry()
-{
-
-}
-
 Entity Registry::CreateEntity()
 {
 	Entity ID = m_AvailableEntities.front();
