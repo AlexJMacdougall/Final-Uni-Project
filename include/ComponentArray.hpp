@@ -4,8 +4,16 @@
 using Entity = std::uint32_t;
 const Entity MAX_ENTITIES = 1000;
 
+//Virtual class for ComponentArrays to inherit from
+//Allows mapping to different types of ComponentArray
+class IComponentArray
+{
+public:
+	virtual void RemoveComponent(Entity entity) = 0;
+};
+
 template <typename T> 
-class ComponentArray 
+class ComponentArray : public IComponentArray
 {
 public:
 	ComponentArray()
@@ -27,22 +35,17 @@ public:
 		mSize += 1;
 	}
 
-	void RemoveComponent(Entity entity)
+	void RemoveComponent(Entity entity) override
 	{
 		//Move last item to deleted item's spot
 		uint32_t indexOfRemovedComponent = mSparseArray[entity];
-		uint32_t indexOfLastComponent = m_size - 1;
+		uint32_t indexOfLastComponent = mSize - 1;
 		mComponentArray[indexOfRemovedComponent] = mComponentArray[indexOfLastComponent];
 
 		//Update sparse array to point to correct index
-		auto iter = std::find(mSparseArray.begin(), mSparseArray[mSize], indexOfLastComponent);
-		Entiy entityOfLastComponent = std::distance(mSparseArray.begin(), iter);
+		auto iter = std::find(mSparseArray.begin(), mSparseArray.end(), indexOfLastComponent);
+		Entity entityOfLastComponent = std::distance(mSparseArray.begin(), iter);
 		mSparseArray[entityOfLastComponent] = indexOfRemovedComponent;
-
-		//Remove unnecessary data
-		mComponentArray.std::erase(indexOfLastComponent);
-		mSparseArray.std::erase(entity);
-
 		mSize -= 1;
 	}
 

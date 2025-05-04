@@ -31,6 +31,25 @@ int main ()
 	// Load a texture from the resources directory
 	Texture wabbit = LoadTexture("wabbit_alpha.png");
 
+	Registry test;
+	test.RegisterComponent<Transform>();
+	test.RegisterComponent<Texture>();
+
+	Entity entity1 = test.CreateEntity();
+
+	test.AddComponent<Transform>(entity1,Transform{0});
+	test.AddComponent<Texture>(entity1,Texture{0});
+	
+	Entity entity2 = test.CreateEntity();
+	test.AddComponent<Transform>(entity2, Transform{ 0 });
+	test.AddComponent<Texture>(entity2, Texture{ 0 });
+
+	Entity entity3 = test.CreateEntity();
+	test.AddComponent<Transform>(entity3, Transform{ 0 });
+	test.AddComponent<Texture>(entity3, Texture{ 0 });
+
+	test.DestroyEntity(entity2);
+
 	// game loop
 	while (!WindowShouldClose())		// run the loop untill the user presses ESCAPE or presses the Close button on the window
 	{

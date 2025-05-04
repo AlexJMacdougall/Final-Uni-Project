@@ -9,17 +9,16 @@ Registry::Registry()
 		m_AvailableEntities.push(ID);
 	}
 
-	mSignatures->fill(Signature{ 0 });
+	m_Signatures->fill(Signature{ 0 });
+	mNextComponentType = 0;
 }
 
 Registry::~Registry()
 {
-	//Delete pointers to unallocate memory
-	delete m_TransformComponents;
-	delete m_TextureComponents;
+
 }
 
-Entity Registry::Create()
+Entity Registry::CreateEntity()
 {
 	Entity ID = m_AvailableEntities.front();
 	m_AvailableEntities.pop();	
@@ -28,32 +27,23 @@ Entity Registry::Create()
 	return ID;
 }
 
-void Registry::Destroy(Entity ID)
+void Registry::DestroyEntity(Entity entity)
 {
-	m_AvailableEntities.push(ID);
+	Signature entitySignature = m_Signatures->at(entity);
 
-	for (int i = 0; i < 16; i++) 
-	{
-			
+	//Check entity signature and remove any entities it has
+	for (int compId = 0; compId < MAX_COMPONENTS; compId++) {
+		if(entitySignature.test(compId))
+		{
+			const char* typeName = m_componentTypesToTypename[compId];
+			m_ComponentArrays[typeName]->RemoveComponent(entity);
+		}
 	}
-	
-	mSignatures->at(ID) = Signature{ 0 };
+
+
+	//Push entity to back of available entity queue and reset signature
+	m_AvailableEntities.push(entity);
+	m_Signatures->at(entity) = Signature{ 0 };
 
 	m_EntityCount -= 1;
-}
-
-const char* Registry::GetComponentTypename(ComponentType type)
-{
-	switch (type) {
-	case 0:
-		const char* typeName = typeid(Transform).name();
-		return typeName;
-	case 1:
-		const char* typeName = typeid(Texture).name();
-		return typeName;
-	default:
-		std::cout << "No component with signature " << type << std::endl;
-		const char* typeName = "Unknown";
-		return typeName;
-	}
 }
