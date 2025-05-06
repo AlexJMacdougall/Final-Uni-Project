@@ -1,11 +1,22 @@
 #include "raylib.h"
 
-class SystemManager {
-	//The SystemManager class uses components to create game behaviour 
-	//Each "System" is a function that can be called in whatever order is required
-	//The SystemManager's update function should be called every game tick
+#include "Registry.hpp"
 
+using Entity = std::uint32_t;
+
+class System {
 public:
-	SystemManager::SystemManager();
+	virtual void Run();
+	void AddEntities(std::set<Entity> newEntities);
+	std::set<Entity> GetEntities();
 private:
+	std::set<Entity> m_Entities = {};
+};
+
+class DrawSystem : public System {
+public:
+	DrawSystem::DrawSystem(std::shared_ptr<Registry> registryPtr);
+	void Run() override;
+private:
+	std::shared_ptr<Registry> m_RegistryPtr;
 };

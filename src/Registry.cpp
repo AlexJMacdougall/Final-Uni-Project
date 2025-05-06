@@ -15,11 +15,14 @@ Registry::Registry()
 
 Entity Registry::CreateEntity()
 {
-	Entity ID = m_AvailableEntities.front();
+	Entity entity = m_AvailableEntities.front();
 	m_AvailableEntities.pop();	
 
+	//Add entity to active entity set
+	m_ActiveEntities.insert(entity);
+
 	m_EntityCount += 1;
-	return ID;
+	return entity;
 }
 
 void Registry::DestroyEntity(Entity entity)
@@ -35,10 +38,17 @@ void Registry::DestroyEntity(Entity entity)
 		}
 	}
 
+	//Remove entity from active entity set
+	m_ActiveEntities.erase(entity);
 
 	//Push entity to back of available entity queue and reset signature
 	m_AvailableEntities.push(entity);
 	m_Signatures->at(entity) = Signature{ 0 };
 
 	m_EntityCount -= 1;
+}
+
+Signature Registry::GetSignature(Entity entity)
+{
+	return m_Signatures->at(entity);
 }

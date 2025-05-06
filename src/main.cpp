@@ -11,7 +11,7 @@ by Jeffery Myers is marked with CC0 1.0. To view a copy of this license, visit h
 
 #include "resource_dir.h"	// utility header for SearchAndSetResourceDir
 
-#include "Registry.hpp"
+#include "System.hpp"
 
 #include <array>
 #include <algorithm>
@@ -37,36 +37,18 @@ int main ()
 
 	Entity entity1 = test.CreateEntity();
 
-	test.AddComponent<Transform>(entity1,Transform{0});
-	test.AddComponent<Texture>(entity1,Texture{0});
-	
-	Entity entity2 = test.CreateEntity();
-	test.AddComponent<Transform>(entity2, Transform{ 0 });
-	test.AddComponent<Texture>(entity2, Texture{ 0 });
+	test.AddComponent<Transform>(entity1, Transform{ Vector3{500,400,0},Quaternion{0},Vector3{1} });
+	test.AddComponent<Texture>(entity1,Texture{ LoadTexture("wabbit_alpha.png") });
 
-	Entity entity3 = test.CreateEntity();
-	test.AddComponent<Transform>(entity3, Transform{ 0 });
-	test.AddComponent<Texture>(entity3, Texture{ 0 });
-
-	test.DestroyEntity(entity2);
+	DrawSystem Draw(std::make_shared<Registry>(test));
+	Draw.AddEntities(test.GetEntitiesWithComponent<Texture>());
 
 	// game loop
 	while (!WindowShouldClose())		// run the loop untill the user presses ESCAPE or presses the Close button on the window
 	{
-		// drawing
-		BeginDrawing();
-
-		// Setup the back buffer for drawing (clear color and depth buffers)
-		ClearBackground(BLACK);
-
-		// draw some text using the default font
-		DrawText("Hello Raylib", 200, 200, 20, WHITE);
-
-		// draw our texture to the screen
-		DrawTexture(wabbit, 400, 200, WHITE);
-
-		// end the frame and get ready for the next one  (display frame, poll input, etc...)
-		EndDrawing();
+		float dt = GetFrameTime();
+		
+		Draw.Run();
 	}
 
 	// cleanup

@@ -2,6 +2,7 @@
 #include "memory"
 #include "queue"
 #include "unordered_map"
+#include "set"
 
 #include "ComponentArray.hpp"
 
@@ -32,10 +33,20 @@ public:
 	//Add new component type
 	template<typename T>
 	void RegisterComponent();
+
+	//Getters
+	Signature GetSignature(Entity entity);
+
+	template<typename T>
+	T GetComponent(Entity entity);
+
+	template<typename T>
+	std::set<Entity> GetEntitiesWithComponent();
 private:
 	//Current number of entities and available entity IDs
 	Entity m_EntityCount;
 	std::queue<Entity> m_AvailableEntities;
+	std::set<Entity> m_ActiveEntities;
 
 	//Holds entity signatures that keep track of what components it has
 	std::array<Signature, MAX_ENTITIES>* m_Signatures = new std::array<Signature, MAX_ENTITIES>;
@@ -97,4 +108,27 @@ inline void Registry::RegisterComponent()
 
 	//Increment mNextComponentType by 1 for next component
 	mNextComponentType += 1;
+}
+
+template<typename T>
+inline T Registry::GetComponent(Entity entity)
+{
+	return GetComponentArray<T>()->GetComponent(entity);
+}
+
+template<typename T>
+inline std::set<Entity> Registry::GetEntitiesWithComponent()
+{
+	std::set<Entity> entities;
+
+	const char* typeName = typeid(T).name();
+
+	ComponentType type = m_typenameToComponentTypes[typeName];
+
+	for (Entity entity : m_ActiveEntities)
+	{
+		if (m_Signatures->at(entity).test(type)) { entities.insert(entity); }
+	}
+
+	return entities;
 }

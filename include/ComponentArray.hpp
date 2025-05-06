@@ -49,6 +49,11 @@ public:
 		mSize -= 1;
 	}
 
+	T GetComponent(Entity entity) 
+	{
+		return mComponentArray[mSparseArray[entity]];
+	}
+
 private:
 	//Sparse Array
 	std::array<uint32_t, MAX_ENTITIES> mSparseArray;
