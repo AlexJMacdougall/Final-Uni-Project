@@ -1,7 +1,12 @@
 #include "System.hpp"
 #include "iostream"
 
-void System::Run()
+
+System::System()
+{
+}
+
+void System::Run(float dt)
 {
 }
 
@@ -20,7 +25,7 @@ DrawSystem::DrawSystem(std::shared_ptr<Registry> registryPtr)
 	m_RegistryPtr = registryPtr;
 }
 
-void DrawSystem::Run()
+void DrawSystem::Run(float dt)
 {
 	BeginDrawing();
 
@@ -28,12 +33,42 @@ void DrawSystem::Run()
 
 	for(Entity entity : GetEntities())
 	{
-		auto& texture = m_RegistryPtr->GetComponent<Texture>(entity);
-		auto& transform = m_RegistryPtr->GetComponent<Transform>(entity);
+		auto texture = m_RegistryPtr->GetComponent<Texture>(entity);
+		auto transform = m_RegistryPtr->GetComponent<Transform>(entity);
 
 		//Draw Texture
-		DrawTexture(texture, transform.translation.x, transform.translation.y, WHITE);
+		DrawTexture(*texture, transform->translation.x, transform->translation.y, WHITE);
 	}
 
 	EndDrawing();
+}
+
+PlayerController::PlayerController(std::shared_ptr<Registry> registryPtr)
+{
+	m_RegistryPtr = registryPtr;
+}
+
+void PlayerController::Run(float dt)
+{
+	for (Entity entity : GetEntities())
+	{
+		auto transform = m_RegistryPtr->GetComponent<Transform>(0);
+
+		float directionX = 0, directionY = 0;
+
+		//Check for keypresses
+		if(IsKeyDown(KEY_D) || IsKeyDown(KEY_A))
+		{
+			directionX = IsKeyDown(KEY_D) - IsKeyDown(KEY_A);
+		}
+		if (IsKeyDown(KEY_W) || IsKeyDown(KEY_S))
+		{
+			directionY =  IsKeyDown(KEY_S) - IsKeyDown(KEY_W);
+		}
+
+		transform->translation.x += directionX;
+		transform->translation.y += directionY;
+
+		std::cout << m_RegistryPtr->GetComponent<Transform>(0)->translation.x << " " << m_RegistryPtr->GetComponent<Transform>(0)->translation.y << std::endl;
+	}
 }

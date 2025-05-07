@@ -38,7 +38,7 @@ public:
 	Signature GetSignature(Entity entity);
 
 	template<typename T>
-	T GetComponent(Entity entity);
+	T* GetComponent(Entity entity);
 
 	template<typename T>
 	std::set<Entity> GetEntitiesWithComponent();
@@ -111,7 +111,7 @@ inline void Registry::RegisterComponent()
 }
 
 template<typename T>
-inline T Registry::GetComponent(Entity entity)
+inline T* Registry::GetComponent(Entity entity)
 {
 	return GetComponentArray<T>()->GetComponent(entity);
 }

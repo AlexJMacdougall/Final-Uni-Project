@@ -36,19 +36,29 @@ int main ()
 	test.RegisterComponent<Texture>();
 
 	Entity entity1 = test.CreateEntity();
+	Entity entity2 = test.CreateEntity();
 
 	test.AddComponent<Transform>(entity1, Transform{ Vector3{500,400,0},Quaternion{0},Vector3{1} });
 	test.AddComponent<Texture>(entity1,Texture{ LoadTexture("wabbit_alpha.png") });
 
+	test.AddComponent<Transform>(entity2, Transform{ Vector3{100,200,0},Quaternion{0},Vector3{1} });
+	test.AddComponent<Texture>(entity2, Texture{ LoadTexture("wabbit_alpha.png") });
+
 	DrawSystem Draw(std::make_shared<Registry>(test));
 	Draw.AddEntities(test.GetEntitiesWithComponent<Texture>());
+
+	PlayerController playerController(std::make_shared<Registry>(test));
+	playerController.AddEntities(std::set<Entity>{entity1});
 
 	// game loop
 	while (!WindowShouldClose())		// run the loop untill the user presses ESCAPE or presses the Close button on the window
 	{
 		float dt = GetFrameTime();
-		
-		Draw.Run();
+
+		playerController.Run(dt);
+
+		std::cout << test.GetComponent<Transform>(entity1)->translation.x << " " << test.GetComponent<Transform>(entity1)->translation.y << std::endl;
+		Draw.Run(dt);
 	}
 
 	// cleanup

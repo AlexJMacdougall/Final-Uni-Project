@@ -49,9 +49,9 @@ public:
 		mSize -= 1;
 	}
 
-	T GetComponent(Entity entity) 
+	T* GetComponent(Entity entity) 
 	{
-		return mComponentArray[mSparseArray[entity]];
+		return &(mComponentArray[mSparseArray[entity]]);
 	}
 
 private:
