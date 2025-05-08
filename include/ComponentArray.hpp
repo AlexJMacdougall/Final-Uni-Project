@@ -19,8 +19,6 @@ public:
 	ComponentArray()
 	{
 		mSize = 0;
-		mSparseArray = {};
-		mComponentArray = {};
 	}
 
 	void AddComponent(Entity entity,T component)
