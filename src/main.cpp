@@ -57,7 +57,6 @@ int main ()
 
 		playerController.Run(dt);
 
-		std::cout << test.GetComponent<Transform>(entity1)->translation.x << " " << test.GetComponent<Transform>(entity1)->translation.y << std::endl;
 		Draw.Run(dt);
 	}
 

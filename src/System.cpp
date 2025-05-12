@@ -52,7 +52,7 @@ void PlayerController::Run(float dt)
 {
 	for (Entity entity : GetEntities())
 	{
-		auto transform = m_RegistryPtr->GetComponent<Transform>(0);
+		auto transform = m_RegistryPtr->GetComponent<Transform>(entity);
 
 		float directionX = 0, directionY = 0;
 
@@ -69,6 +69,6 @@ void PlayerController::Run(float dt)
 		transform->translation.x += directionX;
 		transform->translation.y += directionY;
 
-		std::cout << m_RegistryPtr->GetComponent<Transform>(0)->translation.x << " " << m_RegistryPtr->GetComponent<Transform>(0)->translation.y << std::endl;
+		//std::cout << m_RegistryPtr->GetComponent<Transform>(0)->translation.x << " " << m_RegistryPtr->GetComponent<Transform>(0)->translation.y << std::endl;
 	}
 }
