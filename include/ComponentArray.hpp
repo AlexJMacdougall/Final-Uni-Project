@@ -1,5 +1,6 @@
-#include "cstdint"
-#include "array"
+#include <cstdint>
+#include <array>
+#include <cassert>
 
 using Entity = std::uint32_t;
 const Entity MAX_ENTITIES = 1000;
@@ -23,6 +24,10 @@ public:
 
 	void AddComponent(Entity entity,T component)
 	{
+		//Check the componentarray of type T exists
+		//If you fail this assertion you have attempted to add a component without registering that components type
+		assert(this != nullptr);
+
 		size_t newIndex = mSize;
 
 		//Append Component to dense array at highest location

@@ -1,10 +1,11 @@
-#include "bitset"
-#include "memory"
-#include "queue"
-#include "unordered_map"
-#include "set"
+#include <bitset>
+#include <memory>
+#include <queue>
+#include <unordered_map>
+#include <set>
 
 #include "ComponentArray.hpp"
+#include "Components.hpp"
 
 using ComponentType = std::uint8_t;
 const ComponentType MAX_COMPONENTS = 16;

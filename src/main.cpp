@@ -11,7 +11,7 @@ by Jeffery Myers is marked with CC0 1.0. To view a copy of this license, visit h
 
 #include "resource_dir.h"	// utility header for SearchAndSetResourceDir
 
-#include "System.hpp"
+#include "SystemManager.hpp"
 
 #include <array>
 #include <algorithm>
@@ -23,7 +23,7 @@ int main ()
 	SetConfigFlags(FLAG_VSYNC_HINT | FLAG_WINDOW_HIGHDPI);
 
 	// Create the window and OpenGL context
-	InitWindow(1280, 800, "Hello Raylib");
+	InitWindow(1280, 720, "Hello Raylib");
 
 	// Utility function from resource_dir.h to find the resources folder and set it as the current working directory so we can load from it
 	SearchAndSetResourceDir("resources");
@@ -31,33 +31,32 @@ int main ()
 	// Load a texture from the resources directory
 	Texture wabbit = LoadTexture("wabbit_alpha.png");
 
-	Registry test;
-	test.RegisterComponent<Transform>();
-	test.RegisterComponent<Texture>();
+	Registry REGISTRY;
+	REGISTRY.RegisterComponent<Transform>();
+	REGISTRY.RegisterComponent<Texture>();
+	REGISTRY.RegisterComponent<SphereCollider>();
 
-	Entity entity1 = test.CreateEntity();
-	Entity entity2 = test.CreateEntity();
+	SystemManager SYSTEM(&REGISTRY);
 
-	test.AddComponent<Transform>(entity1, Transform{ Vector3{500,400,0},Quaternion{0},Vector3{1} });
-	test.AddComponent<Texture>(entity1,Texture{ LoadTexture("wabbit_alpha.png") });
+	Entity entity1 = REGISTRY.CreateEntity();
+	Entity entity2 = REGISTRY.CreateEntity();
 
-	test.AddComponent<Transform>(entity2, Transform{ Vector3{100,200,0},Quaternion{0},Vector3{1} });
-	test.AddComponent<Texture>(entity2, Texture{ LoadTexture("wabbit_alpha.png") });
+	SphereCollider test{ 10 };
 
-	DrawSystem Draw(std::make_shared<Registry>(test));
-	Draw.AddEntities(test.GetEntitiesWithComponent<Texture>());
+	REGISTRY.AddComponent<Transform>(entity1, Transform{ Vector3{100,400,0},Quaternion{0},Vector3{1,1,0} });
+	REGISTRY.AddComponent<Texture>(entity1,Texture{ LoadTexture("wabbit_alpha.png") });
+	REGISTRY.AddComponent<SphereCollider>(entity1, SphereCollider{ 10.0f });
 
-	PlayerController playerController(std::make_shared<Registry>(test));
-	playerController.AddEntities(std::set<Entity>{entity1});
+	REGISTRY.AddComponent<Transform>(entity2, Transform{ Vector3{100,200,0},Quaternion{0},Vector3{1,1,0} });
+	REGISTRY.AddComponent<Texture>(entity2, Texture{ LoadTexture("wabbit_alpha.png") });
+	REGISTRY.AddComponent<SphereCollider>(entity2, SphereCollider{ 10.0f });
 
 	// game loop
 	while (!WindowShouldClose())		// run the loop untill the user presses ESCAPE or presses the Close button on the window
 	{
 		float dt = GetFrameTime();
-
-		playerController.Run(dt);
-
-		Draw.Run(dt);
+		SYSTEM.Update(dt);
+		SYSTEM.CheckCollision<SphereCollider>(entity1);
 	}
 
 	// cleanup
@@ -68,4 +67,3 @@ int main ()
 	CloseWindow();
 	return 0;
 }
-
