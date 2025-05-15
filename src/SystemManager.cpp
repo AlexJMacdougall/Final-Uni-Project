@@ -44,8 +44,8 @@ void SystemManager::Draw()
 		//Scale texture
 		texture.height *= (int)scale.x;
 		texture.width *= (int)scale.y;
-		
-		//Draw Texture, offset by half texture scale
+
+		//Draw Texture
 		DrawTexture(texture, position.x - (texture.width / 2), position.y - (texture.height / 2), WHITE);
 	}
 
@@ -68,8 +68,12 @@ void SystemManager::PlayerInput(float dt)
 	{
 		directionY = IsKeyDown(KEY_S) - IsKeyDown(KEY_W);
 	}
+
+	//Move entity then check for collision
 	transform->translation.x += directionX * dt * speed;
+	if(!(CheckCollision<SphereCollider>(0).empty())){ transform->translation.x -= directionX * dt * speed; }
 	transform->translation.y += directionY * dt * speed;
+	if (!(CheckCollision<SphereCollider>(0).empty())) { transform->translation.y -= directionY * dt * speed; }
 }
 
 float SystemManager::GetDistance(Entity entity1, Entity entity2)

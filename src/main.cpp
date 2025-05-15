@@ -35,6 +35,7 @@ int main ()
 	REGISTRY.RegisterComponent<Transform>();
 	REGISTRY.RegisterComponent<Texture>();
 	REGISTRY.RegisterComponent<SphereCollider>();
+	REGISTRY.RegisterComponent<BoxCollider>();
 
 	SystemManager SYSTEM(&REGISTRY);
 
@@ -45,18 +46,17 @@ int main ()
 
 	REGISTRY.AddComponent<Transform>(entity1, Transform{ Vector3{100,400,0},Quaternion{0},Vector3{1,1,0} });
 	REGISTRY.AddComponent<Texture>(entity1,Texture{ LoadTexture("wabbit_alpha.png") });
-	REGISTRY.AddComponent<SphereCollider>(entity1, SphereCollider{ 10.0f });
+	REGISTRY.AddComponent<SphereCollider>(entity1, SphereCollider{ 16.0f });
 
 	REGISTRY.AddComponent<Transform>(entity2, Transform{ Vector3{100,200,0},Quaternion{0},Vector3{1,1,0} });
 	REGISTRY.AddComponent<Texture>(entity2, Texture{ LoadTexture("wabbit_alpha.png") });
-	REGISTRY.AddComponent<SphereCollider>(entity2, SphereCollider{ 10.0f });
+	REGISTRY.AddComponent<SphereCollider>(entity2, SphereCollider{ 16.0f });
 
 	// game loop
 	while (!WindowShouldClose())		// run the loop untill the user presses ESCAPE or presses the Close button on the window
 	{
 		float dt = GetFrameTime();
 		SYSTEM.Update(dt);
-		SYSTEM.CheckCollision<SphereCollider>(entity1);
 	}
 
 	// cleanup

@@ -50,7 +50,39 @@ inline std::set<Entity> SystemManager::CheckCollision(Entity checkEntity)
 
 			if ((distance - collider1->radius - collider2->radius) <= 0)
 			{
-				std::cout << "Collision" << std::endl;
+				collidingEntities.insert(colliderEntity);
+			}
+		}
+	}
+	else if (typeid(t) == typeid(BoxCollider))
+	{
+		//Box to box collision
+		for (Entity colliderEntity : boxColliderEntities)
+		{
+			auto pos1 = m_RegistryPtr->GetComponent<Transform>(checkEntity)->translation;
+			auto pos2 = m_RegistryPtr->GetComponent<Transform>(colliderEntity)->translation;
+
+			auto collider1 = m_RegistryPtr->GetComponent<BoxCollider>(checkEntity);
+			auto collider2 = m_RegistryPtr->GetComponent<BoxCollider>(colliderEntity);
+
+			//AABB positions for comparison
+			float right1 = pos1.x + (collider1->width / 2);
+			float left1 = pos1.x - (collider1->width / 2);
+
+			float right2 = pos2.x + (collider2->width / 2);
+			float left2 = pos2.x - (collider2->width / 2);
+
+			float upper1 = pos1.y - (collider1->height / 2);
+			float lower1 = pos1.y + (collider1->height / 2);
+
+			float upper2 = pos2.y - (collider2->height / 2);
+			float lower2 = pos2.y + (collider2->height / 2);
+
+			if ((right1 >= left2) &&
+				(left1 <= right2) &&
+				(upper1 <= lower2) &&
+				(lower1 >= upper2))
+			{
 				collidingEntities.insert(colliderEntity);
 			}
 		}
