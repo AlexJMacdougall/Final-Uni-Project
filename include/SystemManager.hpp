@@ -1,4 +1,5 @@
 #include <memory>
+#include <vector>
 
 #include "Registry.hpp"
 #include "Components.hpp"
@@ -8,8 +9,9 @@ using Entity = std::uint32_t;
 class SystemManager
 {
 public:
-	SystemManager::SystemManager(Registry* registryPtr);
+	SystemManager::SystemManager(Registry* registryPtr, int screenWidth, int screenHeight);
 
+	void SystemManager::SetPlayer(Entity target);
 	void SystemManager::Update(float dt);
 	void SystemManager::Draw();
 	void SystemManager::PlayerInput(float dt);
@@ -17,11 +19,17 @@ public:
 
 	template<typename t>
 	std::set<Entity> CheckCollision(Entity entity);
+
 private:
 	Registry* m_RegistryPtr;
 
 	//Player Movement Variables
 	float speed = 100;
+
+	Camera2D camera = { 0 };
+	Entity cameraTarget;
+	int screenWidth = 1280;
+	int screenHeight = 720;
 };
 
 template<typename t>

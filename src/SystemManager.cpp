@@ -7,9 +7,28 @@
 
 #include "SystemManager.hpp"
 
-SystemManager::SystemManager(Registry* registryPtr)
+SystemManager::SystemManager(Registry* registryPtr,int screenWidth,int screenHeight)
 {
 	m_RegistryPtr = registryPtr;
+
+	this->screenWidth = screenWidth;
+	this->screenHeight = screenHeight;
+
+	camera.target = Vector2{ 0.0f, 0.0f };
+	camera.offset = Vector2{ screenWidth / 2.0f, screenHeight / 2.0f };
+	camera.rotation = 0.0f;
+	camera.zoom = 1.0f;
+
+	SetTargetFPS(60);
+}
+
+void SystemManager::SetPlayer(Entity target)
+{
+	this->cameraTarget = target;
+
+	auto targetPos = m_RegistryPtr->GetComponent<Transform>(cameraTarget)->translation;
+
+	camera.target = Vector2{ targetPos.x, targetPos.y};
 }
 
 void SystemManager::Update(float dt)
@@ -23,6 +42,8 @@ void SystemManager::Draw()
 	BeginDrawing();
 
 	ClearBackground(BLACK);
+
+	BeginMode2D(camera);
 
 	//Get entities that are drawable
 	std::set<Entity> entities = m_RegistryPtr->GetEntitiesWithComponent<Texture>();
@@ -48,14 +69,14 @@ void SystemManager::Draw()
 		//Draw Texture
 		DrawTexture(texture, position.x - (texture.width / 2), position.y - (texture.height / 2), WHITE);
 	}
-
+	EndMode2D();
 	EndDrawing();
 }
 
 void SystemManager::PlayerInput(float dt)
 {
-	//Temporary; entity zero is the player
-	auto transform = m_RegistryPtr->GetComponent<Transform>(0);
+	//Need assertion to protect player
+	auto transform = m_RegistryPtr->GetComponent<Transform>(cameraTarget);
 
 	float directionX = 0, directionY = 0;
 
@@ -71,9 +92,13 @@ void SystemManager::PlayerInput(float dt)
 
 	//Move entity then check for collision
 	transform->translation.x += directionX * dt * speed;
-	if(!(CheckCollision<SphereCollider>(0).empty())){ transform->translation.x -= directionX * dt * speed; }
+	if(!(CheckCollision<BoxCollider>(0).empty())){ transform->translation.x -= directionX * dt * speed; }
 	transform->translation.y += directionY * dt * speed;
-	if (!(CheckCollision<SphereCollider>(0).empty())) { transform->translation.y -= directionY * dt * speed; }
+	if (!(CheckCollision<BoxCollider>(0).empty())) { transform->translation.y -= directionY * dt * speed; }
+
+	//Update camera pos
+	auto cameraPos = m_RegistryPtr->GetComponent<Transform>(cameraTarget);
+	camera.target = Vector2{ transform->translation.x , transform->translation.y};
 }
 
 float SystemManager::GetDistance(Entity entity1, Entity entity2)
