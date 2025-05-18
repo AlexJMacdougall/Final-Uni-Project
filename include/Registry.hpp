@@ -1,3 +1,5 @@
+#pragma once
+
 #include <bitset>
 #include <memory>
 #include <queue>

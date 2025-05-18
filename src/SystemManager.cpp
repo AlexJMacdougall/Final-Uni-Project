@@ -1,4 +1,4 @@
-#pragma once
+
 
 #include <math.h>
 #include <iostream>
@@ -92,9 +92,9 @@ void SystemManager::PlayerInput(float dt)
 
 	//Move entity then check for collision
 	transform->translation.x += directionX * dt * speed;
-	if(!(CheckCollision<BoxCollider>(0).empty())){ transform->translation.x -= directionX * dt * speed; }
+	if(!(CheckCollision<BoxCollider>(cameraTarget).empty())){ transform->translation.x -= directionX * dt * speed; }
 	transform->translation.y += directionY * dt * speed;
-	if (!(CheckCollision<BoxCollider>(0).empty())) { transform->translation.y -= directionY * dt * speed; }
+	if (!(CheckCollision<BoxCollider>(cameraTarget).empty())) { transform->translation.y -= directionY * dt * speed; }
 
 	//Update camera pos
 	auto cameraPos = m_RegistryPtr->GetComponent<Transform>(cameraTarget);

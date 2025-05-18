@@ -49,6 +49,7 @@ public:
 		auto iter = std::find(mSparseArray.begin(), mSparseArray.end(), indexOfLastComponent);
 		Entity entityOfLastComponent = std::distance(mSparseArray.begin(), iter);
 		mSparseArray[entityOfLastComponent] = indexOfRemovedComponent;
+
 		mSize -= 1;
 	}
 

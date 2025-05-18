@@ -2,7 +2,7 @@
 
 #include "Registry.hpp"
 #include "Components.hpp"
-
+/*
 class System {
 public:
 	System::System(std::shared_ptr<Registry> registryPtr);
@@ -45,3 +45,4 @@ public:
 private:
 	float friction = 10.0f;
 };
+*/

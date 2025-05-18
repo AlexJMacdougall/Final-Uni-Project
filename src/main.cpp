@@ -12,6 +12,7 @@ by Jeffery Myers is marked with CC0 1.0. To view a copy of this license, visit h
 #include "resource_dir.h"	// utility header for SearchAndSetResourceDir
 
 #include "SystemManager.hpp"
+#include "LevelManager.hpp"
 
 #include <array>
 #include <algorithm>
@@ -39,10 +40,11 @@ int main ()
 
 	SystemManager SYSTEM(&REGISTRY,1280,720);
 
+	LevelManager LEVEL(&REGISTRY);
+	LEVEL.GenerateLevel();
+
 	Entity player = REGISTRY.CreateEntity();
 	Entity entity2 = REGISTRY.CreateEntity();
-
-	SphereCollider test{ 10 };
 
 	REGISTRY.AddComponent<Transform>(player, Transform{ Vector3{100,400,0},Quaternion{0},Vector3{1,1,0} });
 	REGISTRY.AddComponent<Texture>(player,Texture{ LoadTexture("wabbit_alpha.png") });

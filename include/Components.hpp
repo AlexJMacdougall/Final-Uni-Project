@@ -1,6 +1,7 @@
 #pragma once
 
 #include "raylib.h"
+#include "Vec2.hpp"
 
 //Small amout of custom structs
 
@@ -19,4 +20,12 @@ struct BoxCollider
 {
 	float width;
 	float height;
+};
+
+struct Room {
+	float width;
+	float height;
+	Color colour;
+	Vec2 position;
+	std::array<Entity*,4> connections;
 };

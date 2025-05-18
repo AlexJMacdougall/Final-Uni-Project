@@ -1,7 +1,7 @@
 #include "System.hpp"
 #include "iostream"
 
-
+/*
 System::System(std::shared_ptr<Registry> registryPtr)
 {
 	m_RegistryPtr = registryPtr;
@@ -11,12 +11,12 @@ void System::Run(float dt)
 {
 }
 
-/*
+
 void System::AddEntities(std::set<Entity> newEntities)
 {
 	m_Entities.merge(newEntities);
 }
-*/
+
 
 void DrawSystem::Run(float dt)
 {
@@ -83,3 +83,4 @@ void CollisionSystem::Run(float dt)
 {
 	//Sphere to sphere collision
 }
+*/
