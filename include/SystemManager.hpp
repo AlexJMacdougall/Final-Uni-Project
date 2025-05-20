@@ -5,13 +5,14 @@
 
 #include "Registry.hpp"
 #include "Components.hpp"
+#include "LevelManager.hpp"
 
 using Entity = std::uint32_t;
 
 class SystemManager
 {
 public:
-	SystemManager::SystemManager(Registry* registryPtr, int screenWidth, int screenHeight);
+	SystemManager::SystemManager(Registry* registryPtr,LevelManager* LEVEL, int screenWidth, int screenHeight);
 
 	void SystemManager::SetPlayer(Entity target);
 	void SystemManager::Update(float dt);
@@ -24,6 +25,7 @@ public:
 
 private:
 	Registry* m_RegistryPtr;
+	LevelManager* m_LevelManagerPtr;
 
 	//Player Movement Variables
 	float speed = 100;

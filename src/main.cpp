@@ -12,7 +12,6 @@ by Jeffery Myers is marked with CC0 1.0. To view a copy of this license, visit h
 #include "resource_dir.h"	// utility header for SearchAndSetResourceDir
 
 #include "SystemManager.hpp"
-#include "LevelManager.hpp"
 
 #include <array>
 #include <algorithm>
@@ -32,17 +31,18 @@ int main ()
 	// Load a texture from the resources directory
 	Texture wabbit = LoadTexture("wabbit_alpha.png");
 
+	//Set up Registry and SystemManager
 	Registry REGISTRY;
 	REGISTRY.RegisterComponent<Transform>();
 	REGISTRY.RegisterComponent<Texture>();
 	REGISTRY.RegisterComponent<SphereCollider>();
 	REGISTRY.RegisterComponent<BoxCollider>();
 
-	SystemManager SYSTEM(&REGISTRY,1280,720);
-
 	LevelManager LEVEL(&REGISTRY);
-	LEVEL.GenerateLevel();
 
+	SystemManager SYSTEM(&REGISTRY,&LEVEL,1280,720);
+
+	//Instantiate entities
 	Entity player = REGISTRY.CreateEntity();
 	Entity entity2 = REGISTRY.CreateEntity();
 

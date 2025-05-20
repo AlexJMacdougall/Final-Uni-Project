@@ -7,9 +7,12 @@
 
 #include "SystemManager.hpp"
 
-SystemManager::SystemManager(Registry* registryPtr,int screenWidth,int screenHeight)
+SystemManager::SystemManager(Registry* registryPtr, LevelManager* levelPtr,int screenWidth,int screenHeight)
 {
 	m_RegistryPtr = registryPtr;
+	m_LevelManagerPtr = levelPtr;
+
+	m_LevelManagerPtr->GenerateLevel(5);
 
 	this->screenWidth = screenWidth;
 	this->screenHeight = screenHeight;

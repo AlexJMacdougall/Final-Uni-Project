@@ -7,41 +7,55 @@ LevelManager::LevelManager(Registry* registryPtr)
 {
 	m_RegistryPtr = registryPtr;
 	m_RegistryPtr->RegisterComponent<Room>();
-
-	currentPos = { 0.0f,0.0f };
 }
 
-void LevelManager::GenerateLevel()
+LevelManager::~LevelManager()
 {
+	for (Entity room : m_Rooms) { m_RegistryPtr->DestroyEntity(room); }
+}
+
+void LevelManager::GenerateLevel(int steps)
+{
+	//Clear old level entites
+	for (Entity room : m_Rooms) { m_RegistryPtr->DestroyEntity(room); }
+
+	Entity currentRoom;
+	Entity newRoom;
+
+	Vec2 currentPos = {0,0};
+	Vec2 newPos;
+	int connectionDir;
+
+	std::array<Vec2, 4> directionVectors = { Vec2{0,1},Vec2{-1,0} ,Vec2{1,0} ,Vec2{0,-1} };
+
 	Entity startRoom = m_RegistryPtr->CreateEntity();
 	m_RegistryPtr->AddComponent<Room>(startRoom, Room{ 100.0f,50.0f,BLUE,currentPos });
 	m_Rooms.insert(startRoom);
 
+	currentRoom = startRoom;
+
 	std::cout << "Created start room, id: " << startRoom << std::endl;
 
-	Entity currentRoom = startRoom;
-
-	for(int i = 0;i<5;i++)
+	for(int i = 0;i<steps;i++)
 	{
 		std::cout << "Start of loop, currentRoom: " << currentRoom << " CurrentPos: " << currentPos.x << " " << currentPos.y << std::endl;
 		//Randomly select direction to move in
-		int connectionDir = rand() % 4;
+		connectionDir = rand() % 4;
 		std::cout << "Connectiondir: " << connectionDir << std::endl;
 
 		//Update position
 		std::cout << "Adding currentPos, " << currentPos.x << " " << currentPos.y << ", to directionVectors at connectionDir(" << connectionDir << "), " << directionVectors[connectionDir].x << " " << directionVectors[connectionDir].y << std::endl;
-		Vec2 newPos = Vec2Add(currentPos, directionVectors[connectionDir]);
+		newPos = Vec2Add(currentPos, directionVectors[connectionDir]);
 
 		std::cout << "newPos: " << newPos.x<<" "<<newPos.y << std::endl;
 		std::cout << "Calling GetRoomAtPos() " << std::endl;
 		//Get or create room at new coordinates
-		Entity newRoom = GetRoomAtPos(newPos);
-
+		newRoom = GetRoomAtPos(newPos);
 
 		//Pass pointer to new Room to current room
-		m_RegistryPtr->GetComponent<Room>(currentRoom)->connections[connectionDir] = &currentRoom;
+		m_RegistryPtr->GetComponent<Room>(currentRoom)->connections[connectionDir] = &newRoom;
 
-		std::cout << "Set currentroom(id " << currentRoom<<"), connection "<<connectionDir<<  " as pointer to newRoom(id "<< newRoom <<")" << std::endl;
+		std::cout << "Set currentroom(id " << currentRoom<<"), connection "<<connectionDir<< " as pointer to newRoom(id "<< newRoom <<")" << std::endl;
 
 		//Pass pointer to current room to new room
 		m_RegistryPtr->GetComponent<Room>(newRoom)->connections[3 - connectionDir] = &currentRoom;
@@ -53,6 +67,11 @@ void LevelManager::GenerateLevel()
 		currentRoom = newRoom;
 		currentPos = newPos;
 	}
+}
+
+std::set<Entity>* LevelManager::GetRooms()
+{
+	return &m_Rooms;
 }
 
 Entity LevelManager::GetRoomAtPos(Vec2 pos)
