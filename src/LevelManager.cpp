@@ -29,7 +29,9 @@ void LevelManager::GenerateLevel(int steps)
 	std::array<Vec2, 4> directionVectors = { Vec2{0,1},Vec2{-1,0} ,Vec2{1,0} ,Vec2{0,-1} };
 
 	Entity startRoom = m_RegistryPtr->CreateEntity();
-	m_RegistryPtr->AddComponent<Room>(startRoom, Room{ 100.0f,50.0f,BLUE,currentPos });
+	int roomID = rand() % NUM_OF_ROOM_TEMPLATES;
+	std::cout <<"RoomID: " << roomID << std::endl;
+	m_RegistryPtr->AddComponent<Room>(startRoom, Room{ roomID ,currentPos});
 	m_Rooms.insert(startRoom);
 
 	currentRoom = startRoom;
@@ -67,11 +69,33 @@ void LevelManager::GenerateLevel(int steps)
 		currentRoom = newRoom;
 		currentPos = newPos;
 	}
+	m_CurrentRoom = startRoom;
+	std::cout << "START ROOM ID IS " << m_RegistryPtr->GetComponent<Room>(startRoom)->id << std::endl;
 }
 
-std::set<Entity>* LevelManager::GetRooms()
+Entity LevelManager::GetCurrentRoom()
 {
-	return &m_Rooms;
+	return m_CurrentRoom;
+}
+
+void LevelManager::LoadCurrentRoom()
+{
+	//Clear old room entities
+	for (Entity entity : m_CurrentRoomEntities) { m_RegistryPtr->DestroyEntity(entity); }
+
+	std::cout << "Load current Room" << std::endl;
+	auto currentRoom = m_RegistryPtr->GetComponent<Room>(m_CurrentRoom);
+	
+	std::cout << "Loaded id: "<<currentRoom->id << std::endl;
+
+	auto roomTextureMap = ROOM_TEMPLATES[currentRoom->id].textureMap;
+	for(int x=0; x < roomTextureMap.size();x++)
+	{
+		for (int y=0; y < roomTextureMap[x].size();y++)
+		{
+			Build(roomTextureMap[x][y], x, y);
+		}
+	}
 }
 
 Entity LevelManager::GetRoomAtPos(Vec2 pos)
@@ -87,8 +111,29 @@ Entity LevelManager::GetRoomAtPos(Vec2 pos)
 	}
 	//If there is no room there it creates one
 	Entity newRoom = m_RegistryPtr->CreateEntity();
-	m_RegistryPtr->AddComponent<Room>(newRoom, Room{ 100.0f,50.0f,ORANGE,pos });
+	int roomID = rand() % NUM_OF_ROOM_TEMPLATES;
+	std::cout << "RoomID: " << roomID << std::endl;
+	m_RegistryPtr->AddComponent<Room>(newRoom, Room{ roomID,pos });
 	m_Rooms.insert(newRoom);
 	std::cout << "Made new room: " << newRoom << std::endl;
 	return newRoom;
+}
+
+void LevelManager::Build(int id, int x, int y)
+{
+	Entity newEntity = m_RegistryPtr->CreateEntity();
+	m_RegistryPtr->AddComponent<Transform>(newEntity, Transform{ {(float)x * 32,(float)y * 32,0},Quaternion{0},{1,1,0} });
+	switch (id) {
+	case(0): //Floor
+		m_RegistryPtr->AddComponent<Sprite>(newEntity, { {0,32,32,32},0 });
+		m_CurrentRoomEntities.insert(newEntity);
+		break;
+	case(1): //Wall
+		m_RegistryPtr->AddComponent<Sprite>(newEntity, {{0,0,32,32},0});
+		m_RegistryPtr->AddComponent<BoxCollider>(newEntity, BoxCollider{ 32,32 });
+		m_CurrentRoomEntities.insert(newEntity);
+		break;
+	default:
+		m_RegistryPtr->DestroyEntity(newEntity);
+	}
 }

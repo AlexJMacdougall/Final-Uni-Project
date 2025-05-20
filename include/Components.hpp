@@ -23,9 +23,18 @@ struct BoxCollider
 };
 
 struct Room {
-	float width;
-	float height;
-	Color colour;
+	int id;
 	Vec2 position;
-	std::array<Entity*,4> connections;
+	std::array<Entity*, 4> connections;
+};
+
+struct RoomTemplate {
+	//std::array<Vec2, 4> doorPositions;
+	std::vector<std::vector<int>> textureMap;
+};
+
+struct Sprite
+{
+	Rectangle textureRect;
+	int SpriteSheetID;
 };

@@ -13,6 +13,8 @@ SystemManager::SystemManager(Registry* registryPtr, LevelManager* levelPtr,int s
 	m_LevelManagerPtr = levelPtr;
 
 	m_LevelManagerPtr->GenerateLevel(5);
+	m_LevelManagerPtr->LoadCurrentRoom();
+	m_CurrentRoom = m_LevelManagerPtr->GetCurrentRoom();
 
 	this->screenWidth = screenWidth;
 	this->screenHeight = screenHeight;
@@ -22,7 +24,21 @@ SystemManager::SystemManager(Registry* registryPtr, LevelManager* levelPtr,int s
 	camera.rotation = 0.0f;
 	camera.zoom = 1.0f;
 
+	LevelSprites = LoadTexture("LevelSprites.png");
+	PlayerSprites = LoadTexture("PlayerSprites.png");
+
+	m_SpriteSheets = 
+	{ 
+		&LevelSprites,
+		&PlayerSprites 
+	};
+
 	SetTargetFPS(60);
+}
+
+SystemManager::~SystemManager()
+{
+	for (auto texPtr : m_SpriteSheets) { UnloadTexture(*texPtr); }
 }
 
 void SystemManager::SetPlayer(Entity target)
@@ -36,7 +52,9 @@ void SystemManager::SetPlayer(Entity target)
 
 void SystemManager::Update(float dt)
 {
+	//Get player inputs
 	this->PlayerInput(dt);
+	//Draw all entities
 	this->Draw();
 }
 
@@ -49,28 +67,19 @@ void SystemManager::Draw()
 	BeginMode2D(camera);
 
 	//Get entities that are drawable
-	std::set<Entity> entities = m_RegistryPtr->GetEntitiesWithComponent<Texture>();
+	std::set<Entity> entities = m_RegistryPtr->GetEntitiesWithComponent<Sprite>();
 
 	for (Entity entity : entities)
 	{
 		//Get entity texture, position and scale.
-		//Copying rather than referencing texture to not repeatedly scale  
-		auto texture = *m_RegistryPtr->GetComponent<Texture>(entity);
+		auto sprite = m_RegistryPtr->GetComponent<Sprite>(entity);
 		auto transform = m_RegistryPtr->GetComponent<Transform>(entity);
 
-		Vector3 position = transform->translation;
-		Vector3 scale = transform->scale;
-		
-		//Check entity scale is not zero
-		//If you failed this assertion you added a texture to an entity with a scale of zero in x or y; therefore it will not draw
-		assert((scale.x != 0) && (scale.y != 0));
-
-		//Scale texture
-		texture.height *= (int)scale.x;
-		texture.width *= (int)scale.y;
+		Vector2 position = { transform->translation.x,transform->translation.y };
+		Texture* spriteSheet = m_SpriteSheets[sprite->SpriteSheetID];
 
 		//Draw Texture
-		DrawTexture(texture, position.x - (texture.width / 2), position.y - (texture.height / 2), WHITE);
+		DrawTextureRec(*spriteSheet, sprite->textureRect, position, WHITE);
 	}
 	EndMode2D();
 	EndDrawing();
@@ -78,10 +87,9 @@ void SystemManager::Draw()
 
 void SystemManager::PlayerInput(float dt)
 {
-	//Need assertion to protect player
 	auto transform = m_RegistryPtr->GetComponent<Transform>(cameraTarget);
 
-	float directionX = 0, directionY = 0;
+	int directionX = 0, directionY = 0;
 
 	//Check for keypresses
 	if (IsKeyDown(KEY_D) || IsKeyDown(KEY_A))
@@ -92,12 +100,26 @@ void SystemManager::PlayerInput(float dt)
 	{
 		directionY = IsKeyDown(KEY_S) - IsKeyDown(KEY_W);
 	}
+	if (IsKeyPressed(KEY_Q))
+	{
+		m_SLOWDOWN = 0.5;
+	}
+	else if (IsKeyReleased(KEY_Q))
+	{
+		m_SLOWDOWN = 1.0;
+	}
+	auto currentRoom = m_RegistryPtr->GetComponent<Room>(m_CurrentRoom);
+	if (IsKeyPressed(KEY_UP))
+	{
+		for (int i = 0;i < 4;i++) { std::cout << currentRoom->connections[i] << std::endl; }
+	}	
 
 	//Move entity then check for collision
-	transform->translation.x += directionX * dt * speed;
-	if(!(CheckCollision<BoxCollider>(cameraTarget).empty())){ transform->translation.x -= directionX * dt * speed; }
-	transform->translation.y += directionY * dt * speed;
-	if (!(CheckCollision<BoxCollider>(cameraTarget).empty())) { transform->translation.y -= directionY * dt * speed; }
+
+	transform->translation.x += directionX * speed * m_SLOWDOWN;
+	if(!(CheckCollision<BoxCollider>(cameraTarget).empty())){ transform->translation.x -= directionX * speed; }
+	transform->translation.y += directionY * speed * m_SLOWDOWN;
+	if (!(CheckCollision<BoxCollider>(cameraTarget).empty())) { transform->translation.y -= directionY * speed; }
 
 	//Update camera pos
 	auto cameraPos = m_RegistryPtr->GetComponent<Transform>(cameraTarget);

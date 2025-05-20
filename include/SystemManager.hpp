@@ -9,10 +9,13 @@
 
 using Entity = std::uint32_t;
 
+const int NUM_OF_SPRITESHEETS = 2;
+
 class SystemManager
 {
 public:
 	SystemManager::SystemManager(Registry* registryPtr,LevelManager* LEVEL, int screenWidth, int screenHeight);
+	SystemManager::~SystemManager();
 
 	void SystemManager::SetPlayer(Entity target);
 	void SystemManager::Update(float dt);
@@ -27,13 +30,24 @@ private:
 	Registry* m_RegistryPtr;
 	LevelManager* m_LevelManagerPtr;
 
+	//Current Room 
+	Entity m_CurrentRoom;
+
 	//Player Movement Variables
-	float speed = 100;
+	float speed = 2;
+	float m_SLOWDOWN = 1.0;
 
 	Camera2D camera = { 0 };
 	Entity cameraTarget;
 	int screenWidth = 1280;
 	int screenHeight = 720;
+
+	//SpriteSheets
+	Texture LevelSprites;
+	Texture PlayerSprites;
+
+	//Map with pointers to Spritesheets, allow sprites to access them
+	std::array<Texture*,NUM_OF_SPRITESHEETS> m_SpriteSheets;
 };
 
 template<typename t>
