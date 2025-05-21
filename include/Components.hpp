@@ -22,12 +22,6 @@ struct BoxCollider
 	float height;
 };
 
-struct Room {
-	int id;
-	Vec2 position;
-	std::array<Entity*, 4> connections;
-};
-
 struct RoomTemplate {
 	//std::array<Vec2, 4> doorPositions;
 	std::vector<std::vector<int>> textureMap;

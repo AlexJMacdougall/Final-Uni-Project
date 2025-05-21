@@ -14,7 +14,6 @@ SystemManager::SystemManager(Registry* registryPtr, LevelManager* levelPtr,int s
 
 	m_LevelManagerPtr->GenerateLevel(5);
 	m_LevelManagerPtr->LoadCurrentRoom();
-	m_CurrentRoom = m_LevelManagerPtr->GetCurrentRoom();
 
 	this->screenWidth = screenWidth;
 	this->screenHeight = screenHeight;
@@ -108,12 +107,23 @@ void SystemManager::PlayerInput(float dt)
 	{
 		m_SLOWDOWN = 1.0;
 	}
-	auto currentRoom = m_RegistryPtr->GetComponent<Room>(m_CurrentRoom);
+	
 	if (IsKeyPressed(KEY_UP))
 	{
-		for (int i = 0;i < 4;i++) { std::cout << currentRoom->connections[i] << std::endl; }
+		m_LevelManagerPtr->Move(3);
 	}	
-
+	if (IsKeyPressed(KEY_DOWN))
+	{
+		m_LevelManagerPtr->Move(0);
+	}	
+	if (IsKeyPressed(KEY_LEFT))
+	{
+		m_LevelManagerPtr->Move(1);
+	}	
+	if (IsKeyPressed(KEY_RIGHT))
+	{
+		m_LevelManagerPtr->Move(2);
+	}
 	//Move entity then check for collision
 
 	transform->translation.x += directionX * speed * m_SLOWDOWN;
