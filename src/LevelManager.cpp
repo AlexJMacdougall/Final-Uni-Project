@@ -59,10 +59,12 @@ Vec2 LevelManager::GetCurrentPos()
 void LevelManager::Move(int dir)
 {
 	//Check there is a room in the direction passed in
-	assert(CheckForRoom(directionVectors[dir]));
+	assert(CheckForRoom(Vec2Add(m_CurrentPos, directionVectors[dir])));
 
 	m_CurrentPos = Vec2Add(m_CurrentPos, directionVectors[dir]);
+	std::cout << m_CurrentPos.x << " " << m_CurrentPos.y << std::endl;
 	LoadCurrentRoom();
+
 }
 
 void LevelManager::LoadCurrentRoom()

@@ -43,7 +43,7 @@ int main ()
 	Entity player = REGISTRY.CreateEntity();
 
 	REGISTRY.AddComponent<Transform>(player, Transform{ Vector3{100,400,0},Quaternion{0},Vector3{1,1,0} });
-	REGISTRY.AddComponent<Sprite>(player, Sprite{ {0,0,32,32},1 });
+	REGISTRY.AddComponent<Sprite>(player, Sprite{ {0,0,32,32},1,1 });
 	REGISTRY.AddComponent<BoxCollider>(player, BoxCollider{ 32.0f,32.0f });
 
 	SYSTEM.SetPlayer(player);

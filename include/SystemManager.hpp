@@ -10,6 +10,7 @@
 using Entity = std::uint32_t;
 
 const int NUM_OF_SPRITESHEETS = 2;
+const int NUM_OF_LAYERS = 2;
 
 class SystemManager
 {

@@ -68,17 +68,25 @@ void SystemManager::Draw()
 	//Get entities that are drawable
 	std::set<Entity> entities = m_RegistryPtr->GetEntitiesWithComponent<Sprite>();
 
-	for (Entity entity : entities)
+	for (int currentLayer = 0; currentLayer < NUM_OF_LAYERS; currentLayer++)
 	{
-		//Get entity texture, position and scale.
-		auto sprite = m_RegistryPtr->GetComponent<Sprite>(entity);
-		auto transform = m_RegistryPtr->GetComponent<Transform>(entity);
+		for (Entity entity : entities)
+		{
+			//Get entity sprite
+			auto sprite = m_RegistryPtr->GetComponent<Sprite>(entity);
+			//Check the sprites layer
+			if(sprite->Layer == currentLayer)
+			{
+				//If the sprite is on the layer currently being drawn, fetch other data needed and draw it
+				auto transform = m_RegistryPtr->GetComponent<Transform>(entity);
 
-		Vector2 position = { transform->translation.x,transform->translation.y };
-		Texture* spriteSheet = m_SpriteSheets[sprite->SpriteSheetID];
+				Vector2 position = { transform->translation.x,transform->translation.y };
+				Texture* spriteSheet = m_SpriteSheets[sprite->SpriteSheetID];
 
-		//Draw Texture
-		DrawTextureRec(*spriteSheet, sprite->textureRect, position, WHITE);
+				//Draw Texture
+				DrawTextureRec(*spriteSheet, sprite->textureRect, position, WHITE);
+			}
+		}
 	}
 	EndMode2D();
 	EndDrawing();

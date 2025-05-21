@@ -31,4 +31,5 @@ struct Sprite
 {
 	Rectangle textureRect;
 	int SpriteSheetID;
+	int Layer = 0; //Default layer
 };
