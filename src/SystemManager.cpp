@@ -115,19 +115,19 @@ void SystemManager::PlayerInput(float dt)
 	{
 		m_SLOWDOWN = 1.0;
 	}
-	
+
 	if (IsKeyPressed(KEY_UP))
 	{
 		m_LevelManagerPtr->Move(3);
-	}	
+	}
 	if (IsKeyPressed(KEY_DOWN))
 	{
 		m_LevelManagerPtr->Move(0);
-	}	
+	}
 	if (IsKeyPressed(KEY_LEFT))
 	{
 		m_LevelManagerPtr->Move(1);
-	}	
+	}
 	if (IsKeyPressed(KEY_RIGHT))
 	{
 		m_LevelManagerPtr->Move(2);
@@ -135,13 +135,13 @@ void SystemManager::PlayerInput(float dt)
 	//Move entity then check for collision
 
 	transform->translation.x += directionX * speed * m_SLOWDOWN;
-	if(!(CheckCollision<BoxCollider>(cameraTarget).empty())){ transform->translation.x -= directionX * speed; }
+	if (!(CheckCollision<BoxCollider>(cameraTarget).empty())) { transform->translation.x -= directionX * speed; }
 	transform->translation.y += directionY * speed * m_SLOWDOWN;
 	if (!(CheckCollision<BoxCollider>(cameraTarget).empty())) { transform->translation.y -= directionY * speed; }
 
 	//Update camera pos
 	auto cameraPos = m_RegistryPtr->GetComponent<Transform>(cameraTarget);
-	camera.target = Vector2{ transform->translation.x , transform->translation.y};
+	camera.target = Vector2{ transform->translation.x , transform->translation.y };
 }
 
 float SystemManager::GetDistance(Entity entity1, Entity entity2)

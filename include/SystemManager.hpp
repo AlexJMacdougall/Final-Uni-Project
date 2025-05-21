@@ -31,9 +31,6 @@ private:
 	Registry* m_RegistryPtr;
 	LevelManager* m_LevelManagerPtr;
 
-	//Current Room 
-	Entity m_CurrentRoom;
-
 	//Player Movement Variables
 	float speed = 2;
 	float m_SLOWDOWN = 1.0;

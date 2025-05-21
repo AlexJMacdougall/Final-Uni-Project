@@ -24,10 +24,10 @@ void LevelManager::GenerateLevel(int steps)
 
 	srand(time(NULL));
 
-	int roomID = rand() % 2;
-	m_Rooms.push_back(std::pair{ currentPos, roomID });
+	//Create starting room, always template 0
+	m_Rooms.push_back(std::pair{ currentPos, 0 });
 
-	std::cout << "Position: " << currentPos.x << " " << currentPos.y << " ID: " << roomID << std::endl;
+	std::cout << "Position: " << currentPos.x << " " << currentPos.y << " ID: " << 0 << std::endl;
 
 	for(int i = 0;i<steps;i++)
 	{
@@ -41,7 +41,7 @@ void LevelManager::GenerateLevel(int steps)
 
 		if(!CheckForRoom(newPos))
 		{
-			int roomID = rand() % 2;
+			int roomID = rand() % NUM_OF_ROOM_TEMPLATES;
 			m_Rooms.push_back({ newPos,roomID });
 			std::cout << "Position: " << newPos.x << " " << newPos.y << " ID: " << roomID << std::endl;
 		}
@@ -58,13 +58,19 @@ Vec2 LevelManager::GetCurrentPos()
 
 void LevelManager::Move(int dir)
 {
+	std::cout << "Moving to room (" << Vec2Add(m_CurrentPos, directionVectors[dir]).x << ", " << Vec2Add(m_CurrentPos, directionVectors[dir]).y << ") id: " << GetRoomID(Vec2Add(m_CurrentPos, directionVectors[dir])) << std::endl;
 	//Check there is a room in the direction passed in
-	assert(CheckForRoom(Vec2Add(m_CurrentPos, directionVectors[dir])));
-
-	m_CurrentPos = Vec2Add(m_CurrentPos, directionVectors[dir]);
-	std::cout << m_CurrentPos.x << " " << m_CurrentPos.y << std::endl;
-	LoadCurrentRoom();
-
+	//assert(CheckForRoom(Vec2Add(m_CurrentPos, directionVectors[dir])));
+	if(CheckForRoom(Vec2Add(m_CurrentPos, directionVectors[dir])))
+	{
+		m_CurrentPos = Vec2Add(m_CurrentPos, directionVectors[dir]);
+		std::cout << m_CurrentPos.x << " " << m_CurrentPos.y << std::endl;
+		LoadCurrentRoom();
+	}
+	else
+	{
+		std::cout << "You tried to move in direction (" << directionVectors[dir].x << ", " << directionVectors[dir].y << ") to position (" << Vec2Add(m_CurrentPos, directionVectors[dir]).x << ", " << Vec2Add(m_CurrentPos, directionVectors[dir]).y<<") but no room exists" << std::endl;
+	}
 }
 
 void LevelManager::LoadCurrentRoom()
@@ -79,6 +85,19 @@ void LevelManager::LoadCurrentRoom()
 		for (int y=0; y < roomTextureMap[x].size();y++)
 		{
 			Build(roomTextureMap[x][y], x, y);
+		}
+	}
+	auto roomDoorPositions = ROOM_TEMPLATES[GetRoomID(m_CurrentPos)].doorPositions;
+
+	for(int dir = 0; dir < 4;dir++)
+	{
+		if(CheckForRoom(Vec2Add(directionVectors[dir], m_CurrentPos)))
+		{
+			Entity newDoor = m_RegistryPtr->CreateEntity();
+			m_RegistryPtr->AddComponent<Transform>(newDoor, Transform{ {roomDoorPositions[dir].x,roomDoorPositions[dir].y,0},Quaternion{0},{1,1,0}});
+			m_RegistryPtr->AddComponent<Sprite>(newDoor, { {0,0,32,32},1,1 });
+
+			m_CurrentRoomEntities.insert(newDoor);
 		}
 	}
 }

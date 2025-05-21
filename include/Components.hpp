@@ -23,7 +23,7 @@ struct BoxCollider
 };
 
 struct RoomTemplate {
-	//std::array<Vec2, 4> doorPositions;
+	std::array<Vec2, 4> doorPositions;
 	std::vector<std::vector<int>> textureMap;
 };
 
@@ -32,4 +32,9 @@ struct Sprite
 	Rectangle textureRect;
 	int SpriteSheetID;
 	int Layer = 0; //Default layer
+};
+
+struct ScriptComponent 
+{
+	void(*scriptPtr)();
 };
