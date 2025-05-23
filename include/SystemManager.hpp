@@ -2,10 +2,14 @@
 
 #include <memory>
 #include <vector>
+#include <array>
 
-#include "Registry.hpp"
-#include "Components.hpp"
+#include <raylib.h>
+
 #include "LevelManager.hpp"
+#include "Registry.hpp"
+#include "Components/ScriptComponent.hpp"
+#include "Components/DoorScript.hpp"
 
 using Entity = std::uint32_t;
 
@@ -15,28 +19,33 @@ const int NUM_OF_LAYERS = 2;
 class SystemManager
 {
 public:
-	SystemManager::SystemManager(Registry* registryPtr,LevelManager* LEVEL, int screenWidth, int screenHeight);
-	SystemManager::~SystemManager();
+	SystemManager(Registry* registryPtr,LevelManager* LEVEL, int screenWidth, int screenHeight);
+	~SystemManager();
 
-	void SystemManager::SetPlayer(Entity target);
-	void SystemManager::Update(float dt);
-	void SystemManager::Draw();
-	void SystemManager::PlayerInput(float dt);
-	float SystemManager::GetDistance(Entity entity1, Entity entity2);
+	void SetPlayer(Entity target);
+	void Update(float dt);
+	void RunScripts(float dt);
+	void Draw();
+	//void SystemManager::PlayerInput(float dt);
+	float GetDistance(Entity entity1, Entity entity2);
+
+	float GetSlowdownValue();
+	void SetSlowdownValue(float slowdown);
+
+	Camera2D* GetCamera();
 
 	template<typename t>
 	std::set<Entity> CheckCollision(Entity entity);
-
 private:
 	Registry* m_RegistryPtr;
 	LevelManager* m_LevelManagerPtr;
 
 	//Player Movement Variables
-	float speed = 2;
-	float m_SLOWDOWN = 1.0;
+	float m_Speed = 2;
+	float m_Slowdown = 1.0;
 
 	Camera2D camera = { 0 };
-	Entity cameraTarget;
+	Entity m_CameraTarget;
 	int screenWidth = 1280;
 	int screenHeight = 720;
 

@@ -7,7 +7,6 @@
 #include <set>
 
 #include "ComponentArray.hpp"
-#include "Components.hpp"
 
 using ComponentType = std::uint8_t;
 const ComponentType MAX_COMPONENTS = 16;
@@ -116,6 +115,10 @@ inline void Registry::RegisterComponent()
 template<typename T>
 inline T* Registry::GetComponent(Entity entity)
 {
+	//Check if entity has component of type T
+	//If you failed this assertion you tried to get a component from an entity that doesnt have one of that type
+	assert(m_Signatures->at(entity).test(m_typenameToComponentTypes[typeid(T).name()]));
+
 	return GetComponentArray<T>()->GetComponent(entity);
 }
 

@@ -15,6 +15,10 @@ Registry::Registry()
 
 Entity Registry::CreateEntity()
 {
+	//Check if there is a available entity 
+	//If you failed this assertion you ran out of availabile entity IDs. Either increase the maximum or check if you are creating entities that dont get destroyed when they should
+	assert(!m_AvailableEntities.empty());
+
 	Entity entity = m_AvailableEntities.front();
 	m_AvailableEntities.pop();	
 
@@ -27,6 +31,10 @@ Entity Registry::CreateEntity()
 
 void Registry::DestroyEntity(Entity entity)
 {
+	//Check if destroyed entity is active
+	//If you failed this assertion you tried to destroy an inactive entity, or an entity that cannot be created
+	assert(m_ActiveEntities.find(entity) != m_ActiveEntities.end());
+
 	Signature entitySignature = m_Signatures->at(entity);
 
 	//Check entity signature and remove any entities it has

@@ -4,9 +4,9 @@
 #include<cstdlib>
 #include<cassert>
 
-LevelManager::LevelManager(Registry* registryPtr)
+LevelManager::LevelManager(Registry* registryPtr):
+	m_RegistryPtr(registryPtr)
 {
-	m_RegistryPtr = registryPtr;
 	m_CurrentPos = { 0,0 };
 }
 
@@ -32,10 +32,10 @@ void LevelManager::GenerateLevel(int steps)
 	for(int i = 0;i<steps;i++)
 	{
 		//Randomly select direction to move in
-		connectionDir = rand() % 4;
+		std::string connectionDir[4] = {"Up","Down","Left","Right"};
 
 		//Update position
-		newPos = Vec2Add(currentPos, directionVectors[connectionDir]);
+		newPos = Vec2Add(currentPos, directionVectors[connectionDir[rand() % 4]]);
 
 		//If there is no room at the pos, add a new one
 
@@ -56,50 +56,25 @@ Vec2 LevelManager::GetCurrentPos()
 	return m_CurrentPos;
 }
 
-void LevelManager::Move(int dir)
+void LevelManager::Move(std::string dir)
 {
-	std::cout << "Moving to room (" << Vec2Add(m_CurrentPos, directionVectors[dir]).x << ", " << Vec2Add(m_CurrentPos, directionVectors[dir]).y << ") id: " << GetRoomID(Vec2Add(m_CurrentPos, directionVectors[dir])) << std::endl;
 	//Check there is a room in the direction passed in
-	//assert(CheckForRoom(Vec2Add(m_CurrentPos, directionVectors[dir])));
+	std::cout << "Moving in direction: " << directionVectors[dir].x << ", " << directionVectors[dir].y <<"(" <<dir<<")"<< std::endl;
 	if(CheckForRoom(Vec2Add(m_CurrentPos, directionVectors[dir])))
 	{
 		m_CurrentPos = Vec2Add(m_CurrentPos, directionVectors[dir]);
 		std::cout << m_CurrentPos.x << " " << m_CurrentPos.y << std::endl;
-		LoadCurrentRoom();
+		loadedRoom = false;
 	}
 	else
 	{
-		std::cout << "You tried to move in direction (" << directionVectors[dir].x << ", " << directionVectors[dir].y << ") to position (" << Vec2Add(m_CurrentPos, directionVectors[dir]).x << ", " << Vec2Add(m_CurrentPos, directionVectors[dir]).y<<") but no room exists" << std::endl;
+		std::cout << "You tried to move in direction (" << directionVectors[dir].x << ", " << directionVectors[dir].y << ") to position (" << Vec2Add(m_CurrentPos, directionVectors[dir]).x << ", "<< Vec2Add(m_CurrentPos, directionVectors[dir]).y<<") but no room exists" << std::endl;
 	}
 }
 
-void LevelManager::LoadCurrentRoom()
+void LevelManager::SetPlayer(Entity player)
 {
-	//Clear old room entities
-	for (Entity entity : m_CurrentRoomEntities) { m_RegistryPtr->DestroyEntity(entity); }
-
-	auto roomTextureMap = ROOM_TEMPLATES[GetRoomID(m_CurrentPos)].textureMap;
-
-	for(int x=0; x < roomTextureMap.size();x++)
-	{
-		for (int y=0; y < roomTextureMap[x].size();y++)
-		{
-			Build(roomTextureMap[x][y], x, y);
-		}
-	}
-	auto roomDoorPositions = ROOM_TEMPLATES[GetRoomID(m_CurrentPos)].doorPositions;
-
-	for(int dir = 0; dir < 4;dir++)
-	{
-		if(CheckForRoom(Vec2Add(directionVectors[dir], m_CurrentPos)))
-		{
-			Entity newDoor = m_RegistryPtr->CreateEntity();
-			m_RegistryPtr->AddComponent<Transform>(newDoor, Transform{ {roomDoorPositions[dir].x,roomDoorPositions[dir].y,0},Quaternion{0},{1,1,0}});
-			m_RegistryPtr->AddComponent<Sprite>(newDoor, { {0,0,32,32},1,1 });
-
-			m_CurrentRoomEntities.insert(newDoor);
-		}
-	}
+	m_PlayerEntity = player;
 }
 
 bool LevelManager::CheckForRoom(Vec2 pos)
@@ -107,7 +82,7 @@ bool LevelManager::CheckForRoom(Vec2 pos)
 	//Checks for a room at a given position
 	for (auto room : m_Rooms)
 	{
-		if (CompareVec2(pos,room.first))
+		if (CompareVec2(pos, room.first))
 		{
 			return true;
 		}
@@ -130,21 +105,131 @@ int LevelManager::GetRoomID(Vec2 pos)
 	}
 }
 
+void LevelManager::LoadCurrentRoom()
+{
+	//Clear old room entities
+	for (Entity entity : m_CurrentRoomEntities) 
+	{ 
+		m_RegistryPtr->DestroyEntity(entity); 
+	}
+	m_CurrentRoomEntities = {};
+	m_CurrentRoomDoorEntities = {};
+
+	auto roomTextureMap = ROOM_TEMPLATES[GetRoomID(m_CurrentPos)].entityMap;
+
+	for(int x=0; x < roomTextureMap.size();x++)
+	{
+		for (int y=0; y < roomTextureMap[x].size();y++)
+		{
+			Build(roomTextureMap[x][y], x, y);
+		}
+	}
+}
+
+std::set<Entity> LevelManager::GetCurrentRoomDoorEntities()
+{
+	return m_CurrentRoomDoorEntities;
+}
+
 void LevelManager::Build(int id, int x, int y)
 {
 	Entity newEntity = m_RegistryPtr->CreateEntity();
 	m_RegistryPtr->AddComponent<Transform>(newEntity, Transform{ {(float)x * 32,(float)y * 32,0},Quaternion{0},{1,1,0} });
+
+	m_CurrentRoomEntities.insert(newEntity);
+	
 	switch (id) {
 	case(0): //Floor
 		m_RegistryPtr->AddComponent<Sprite>(newEntity, { {0,32,32,32},0 });
-		m_CurrentRoomEntities.insert(newEntity);
 		break;
+
 	case(1): //Wall
 		m_RegistryPtr->AddComponent<Sprite>(newEntity, {{0,0,32,32},0});
 		m_RegistryPtr->AddComponent<BoxCollider>(newEntity, BoxCollider{ 32,32 });
-		m_CurrentRoomEntities.insert(newEntity);
 		break;
+
+	case(2)://Up Door
+		if (CheckForRoom(Vec2Add(directionVectors["Up"], m_CurrentPos)))
+		{
+			m_RegistryPtr->AddComponent<Sprite>(newEntity, { {0,0,32,32},1,1 });
+
+			DoorScript doorScript = DoorScript(newEntity, m_PlayerEntity, m_RegistryPtr,this, "Up");
+			ScriptComponent doorComp = ScriptComponent();
+			doorComp.attachScript<DoorScript>(doorScript);
+
+			m_RegistryPtr->AddComponent<ScriptComponent>(newEntity, doorComp);
+
+			m_CurrentRoomDoorEntities.insert(newEntity);
+		}
+		else
+		{
+			m_RegistryPtr->AddComponent<Sprite>(newEntity, { {0,0,32,32},0 });
+			m_RegistryPtr->AddComponent<BoxCollider>(newEntity, BoxCollider{ 32,32 });
+		}
+		break;
+
+	case(3)://Down Door
+		if (CheckForRoom(Vec2Add(directionVectors["Down"], m_CurrentPos)))
+		{
+			m_RegistryPtr->AddComponent<Sprite>(newEntity, { {0,0,32,32},1,1 });
+
+			DoorScript doorScript = DoorScript(newEntity, m_PlayerEntity, m_RegistryPtr,this, "Down");
+			ScriptComponent doorComp = ScriptComponent();
+			doorComp.attachScript<DoorScript>(doorScript);
+
+			m_RegistryPtr->AddComponent<ScriptComponent>(newEntity, doorComp);
+
+			m_CurrentRoomDoorEntities.insert(newEntity);
+		}
+		else
+		{
+			m_RegistryPtr->AddComponent<Sprite>(newEntity, { {0,0,32,32},0 });
+			m_RegistryPtr->AddComponent<BoxCollider>(newEntity, BoxCollider{ 32,32 });
+		}
+		break;
+
+	case(4)://Right Door
+		if (CheckForRoom(Vec2Add(directionVectors["Left"], m_CurrentPos)))
+		{
+			m_RegistryPtr->AddComponent<Sprite>(newEntity, { {0,0,32,32},1,1 });
+
+			DoorScript doorScript = DoorScript(newEntity, m_PlayerEntity, m_RegistryPtr,this, "Left");
+			ScriptComponent doorComp = ScriptComponent();
+			doorComp.attachScript<DoorScript>(doorScript);
+
+			m_RegistryPtr->AddComponent<ScriptComponent>(newEntity, doorComp);
+
+			m_CurrentRoomDoorEntities.insert(newEntity);
+		}
+		else
+		{
+			m_RegistryPtr->AddComponent<Sprite>(newEntity, { {0,0,32,32},0 });
+			m_RegistryPtr->AddComponent<BoxCollider>(newEntity, BoxCollider{ 32,32 });
+		}
+		break;
+
+	case(5)://Left Door
+		if (CheckForRoom(Vec2Add(directionVectors["Right"], m_CurrentPos)))
+		{
+			m_RegistryPtr->AddComponent<Sprite>(newEntity, { {0,0,32,32},1,1 });
+
+			DoorScript doorScript = DoorScript(newEntity, m_PlayerEntity, m_RegistryPtr,this, "Right");
+			ScriptComponent doorComp = ScriptComponent();
+			doorComp.attachScript<DoorScript>(doorScript);
+
+			m_RegistryPtr->AddComponent<ScriptComponent>(newEntity, doorComp);
+
+			m_CurrentRoomDoorEntities.insert(newEntity);
+		}
+		else
+		{
+			m_RegistryPtr->AddComponent<Sprite>(newEntity, { {0,0,32,32},0 });
+			m_RegistryPtr->AddComponent<BoxCollider>(newEntity, BoxCollider{ 32,32 });
+		}
+		break;
+
 	default:
 		m_RegistryPtr->DestroyEntity(newEntity);
+		m_CurrentRoomEntities.erase(newEntity);
 	}
 }

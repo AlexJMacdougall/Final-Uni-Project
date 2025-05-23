@@ -1,7 +1,10 @@
 #pragma once
 
-#include "raylib.h"
-#include "Vec2.hpp"
+#include <vector>
+
+#include <raylib.h>
+
+#include "Components/Vec2.hpp"
 
 //Small amout of custom structs
 
@@ -23,8 +26,7 @@ struct BoxCollider
 };
 
 struct RoomTemplate {
-	std::array<Vec2, 4> doorPositions;
-	std::vector<std::vector<int>> textureMap;
+	std::vector<std::vector<int>> entityMap;
 };
 
 struct Sprite
@@ -32,9 +34,4 @@ struct Sprite
 	Rectangle textureRect;
 	int SpriteSheetID;
 	int Layer = 0; //Default layer
-};
-
-struct ScriptComponent 
-{
-	void(*scriptPtr)();
 };

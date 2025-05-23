@@ -12,9 +12,6 @@ SystemManager::SystemManager(Registry* registryPtr, LevelManager* levelPtr,int s
 	m_RegistryPtr = registryPtr;
 	m_LevelManagerPtr = levelPtr;
 
-	m_LevelManagerPtr->GenerateLevel(5);
-	m_LevelManagerPtr->LoadCurrentRoom();
-
 	this->screenWidth = screenWidth;
 	this->screenHeight = screenHeight;
 
@@ -42,19 +39,39 @@ SystemManager::~SystemManager()
 
 void SystemManager::SetPlayer(Entity target)
 {
-	this->cameraTarget = target;
+	this->m_CameraTarget = target;
 
-	auto targetPos = m_RegistryPtr->GetComponent<Transform>(cameraTarget)->translation;
+	auto targetPos = m_RegistryPtr->GetComponent<Transform>(m_CameraTarget)->translation;
 
 	camera.target = Vector2{ targetPos.x, targetPos.y};
 }
 
 void SystemManager::Update(float dt)
 {
-	//Get player inputs
-	this->PlayerInput(dt);
+	//Check if the current room has been loaded
+	if(!m_LevelManagerPtr->loadedRoom)
+	{
+		m_LevelManagerPtr->loadedRoom = true;
+		m_LevelManagerPtr->LoadCurrentRoom();
+	}
+
+	//Run entity scripts
+	this->RunScripts(dt);
+
 	//Draw all entities
 	this->Draw();
+}
+
+void SystemManager::RunScripts(float dt)
+{
+	//Get entities that have script components
+	std::set<Entity> entities = m_RegistryPtr->GetEntitiesWithComponent<ScriptComponent>();
+
+	//Iterate over them and call update function
+	for(Entity entity:entities) 
+	{
+		m_RegistryPtr->GetComponent<ScriptComponent>(entity)->update(dt);
+	}
 }
 
 void SystemManager::Draw()
@@ -91,10 +108,10 @@ void SystemManager::Draw()
 	EndMode2D();
 	EndDrawing();
 }
-
+/*
 void SystemManager::PlayerInput(float dt)
 {
-	auto transform = m_RegistryPtr->GetComponent<Transform>(cameraTarget);
+	auto transform = m_RegistryPtr->GetComponent<Transform>(m_CameraTarget);
 
 	int directionX = 0, directionY = 0;
 
@@ -109,11 +126,11 @@ void SystemManager::PlayerInput(float dt)
 	}
 	if (IsKeyPressed(KEY_Q))
 	{
-		m_SLOWDOWN = 0.5;
+		m_Slowdown = 0.5;
 	}
 	else if (IsKeyReleased(KEY_Q))
 	{
-		m_SLOWDOWN = 1.0;
+		m_Slowdown = 1.0;
 	}
 
 	if (IsKeyPressed(KEY_UP))
@@ -134,15 +151,15 @@ void SystemManager::PlayerInput(float dt)
 	}
 	//Move entity then check for collision
 
-	transform->translation.x += directionX * speed * m_SLOWDOWN;
-	if (!(CheckCollision<BoxCollider>(cameraTarget).empty())) { transform->translation.x -= directionX * speed; }
-	transform->translation.y += directionY * speed * m_SLOWDOWN;
-	if (!(CheckCollision<BoxCollider>(cameraTarget).empty())) { transform->translation.y -= directionY * speed; }
+	transform->translation.x += directionX * m_Speed * m_Slowdown;
+	if (!(CheckCollision<BoxCollider>(m_CameraTarget).empty())) { transform->translation.x -= directionX * m_Speed; }
+	transform->translation.y += directionY * m_Speed * m_Slowdown;
+	if (!(CheckCollision<BoxCollider>(m_CameraTarget).empty())) { transform->translation.y -= directionY * m_Speed; }
 
 	//Update camera pos
-	auto cameraPos = m_RegistryPtr->GetComponent<Transform>(cameraTarget);
+	auto cameraPos = m_RegistryPtr->GetComponent<Transform>(m_CameraTarget);
 	camera.target = Vector2{ transform->translation.x , transform->translation.y };
-}
+}*/
 
 float SystemManager::GetDistance(Entity entity1, Entity entity2)
 {
@@ -157,4 +174,19 @@ float SystemManager::GetDistance(Entity entity1, Entity entity2)
 	//Use pythagoras to calculate Distance
 	float dist = sqrt((xDist*xDist) + (yDist*yDist));
 	return dist;
+}
+
+float SystemManager::GetSlowdownValue()
+{
+	return m_Slowdown;
+}
+
+void SystemManager::SetSlowdownValue(float slowdown)
+{
+	m_Slowdown = slowdown;
+}
+
+Camera2D* SystemManager::GetCamera()
+{
+	return &camera;
 }

@@ -1,4 +1,4 @@
-#include "Vec2.hpp"
+#include "Components/Vec2.hpp"
 
 Vec2 Vec2Add(Vec2 v1, Vec2 v2)
 {
