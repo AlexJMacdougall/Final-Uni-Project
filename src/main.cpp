@@ -35,14 +35,14 @@ int main ()
 
 	//Set up Registry and SystemManager
 	Registry REGISTRY;
-	REGISTRY.RegisterComponent<Transform>();
+	REGISTRY.RegisterComponent<Transform2D>();
 	REGISTRY.RegisterComponent<Sprite>();
 	REGISTRY.RegisterComponent<SphereCollider>();
 	REGISTRY.RegisterComponent<BoxCollider>();
 	REGISTRY.RegisterComponent<ScriptComponent>();
 
 	LevelManager LEVEL(&REGISTRY);
-	LEVEL.GenerateLevel(5);
+	LEVEL.GenerateLevel(10);
 
 	SystemManager SYSTEM(&REGISTRY,&LEVEL,1280,720);
 
@@ -50,7 +50,7 @@ int main ()
 	//Player
 	Entity player = REGISTRY.CreateEntity();
 
-	REGISTRY.AddComponent<Transform>(player, Transform{ Vector3{192,192,0},Quaternion{0},Vector3{1,1,0} });
+	REGISTRY.AddComponent<Transform2D>(player, Transform2D{ Vec2{192,192},Vec2{1,1}});
 	REGISTRY.AddComponent<Sprite>(player, Sprite{ {0,0,32,32},1,1 });
 	REGISTRY.AddComponent<BoxCollider>(player, BoxCollider{ 32.0f,32.0f });
 

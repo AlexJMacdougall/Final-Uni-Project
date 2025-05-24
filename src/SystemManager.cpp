@@ -37,30 +37,47 @@ SystemManager::~SystemManager()
 	for (auto texPtr : m_SpriteSheets) { UnloadTexture(*texPtr); }
 }
 
-void SystemManager::SetPlayer(Entity target)
-{
-	this->m_CameraTarget = target;
-
-	auto targetPos = m_RegistryPtr->GetComponent<Transform>(m_CameraTarget)->translation;
-
-	camera.target = Vector2{ targetPos.x, targetPos.y};
-}
-
 void SystemManager::Update(float dt)
 {
+	//Run entity scripts
+	this->RunScripts(dt);
+
 	//Check if the current room has been loaded
-	if(!m_LevelManagerPtr->loadedRoom)
+	if (!m_LevelManagerPtr->loadedRoom)
 	{
 		m_LevelManagerPtr->loadedRoom = true;
 		m_LevelManagerPtr->LoadCurrentRoom();
 	}
 
-	//Run entity scripts
-	this->RunScripts(dt);
+	if (m_LevelManagerPtr->doorInteracted != "None")
+	{
+		std::string movedDirection = m_LevelManagerPtr->doorInteracted;
+		m_LevelManagerPtr->Move(movedDirection);
+		m_LevelManagerPtr->LoadCurrentRoom();
+		m_LevelManagerPtr->doorInteracted = "None";
+
+		//Set player's position to next to the opposite door in the new room
+		Entity door = m_LevelManagerPtr->GetDoorEntity(directionOpposites[movedDirection]);
+		Vec2 doorPos = m_RegistryPtr->GetComponent<Transform2D>(door)->position;
+		Vec2 offset = Vec2MultiplyInt(directionVectors[directionOpposites[movedDirection]],32);
+
+		m_RegistryPtr->GetComponent<Transform2D>(m_PlayerEntity)->position = Vec2Minus(doorPos, offset);
+	}
+
 
 	//Draw all entities
 	this->Draw();
 }
+
+void SystemManager::SetPlayer(Entity target)
+{
+	this->m_PlayerEntity = target;
+
+	auto targetPos = m_RegistryPtr->GetComponent<Transform2D>(m_PlayerEntity)->position;
+
+	camera.target = Vector2{ targetPos.x, targetPos.y};
+}
+
 
 void SystemManager::RunScripts(float dt)
 {
@@ -95,9 +112,9 @@ void SystemManager::Draw()
 			if(sprite->Layer == currentLayer)
 			{
 				//If the sprite is on the layer currently being drawn, fetch other data needed and draw it
-				auto transform = m_RegistryPtr->GetComponent<Transform>(entity);
+				auto transform = m_RegistryPtr->GetComponent<Transform2D>(entity);
 
-				Vector2 position = { transform->translation.x,transform->translation.y };
+				Vector2 position = { transform->position.x,transform->position.y };
 				Texture* spriteSheet = m_SpriteSheets[sprite->SpriteSheetID];
 
 				//Draw Texture
@@ -108,64 +125,12 @@ void SystemManager::Draw()
 	EndMode2D();
 	EndDrawing();
 }
-/*
-void SystemManager::PlayerInput(float dt)
-{
-	auto transform = m_RegistryPtr->GetComponent<Transform>(m_CameraTarget);
-
-	int directionX = 0, directionY = 0;
-
-	//Check for keypresses
-	if (IsKeyDown(KEY_D) || IsKeyDown(KEY_A))
-	{
-		directionX = IsKeyDown(KEY_D) - IsKeyDown(KEY_A);
-	}
-	if (IsKeyDown(KEY_W) || IsKeyDown(KEY_S))
-	{
-		directionY = IsKeyDown(KEY_S) - IsKeyDown(KEY_W);
-	}
-	if (IsKeyPressed(KEY_Q))
-	{
-		m_Slowdown = 0.5;
-	}
-	else if (IsKeyReleased(KEY_Q))
-	{
-		m_Slowdown = 1.0;
-	}
-
-	if (IsKeyPressed(KEY_UP))
-	{
-		m_LevelManagerPtr->Move(3);
-	}
-	if (IsKeyPressed(KEY_DOWN))
-	{
-		m_LevelManagerPtr->Move(0);
-	}
-	if (IsKeyPressed(KEY_LEFT))
-	{
-		m_LevelManagerPtr->Move(1);
-	}
-	if (IsKeyPressed(KEY_RIGHT))
-	{
-		m_LevelManagerPtr->Move(2);
-	}
-	//Move entity then check for collision
-
-	transform->translation.x += directionX * m_Speed * m_Slowdown;
-	if (!(CheckCollision<BoxCollider>(m_CameraTarget).empty())) { transform->translation.x -= directionX * m_Speed; }
-	transform->translation.y += directionY * m_Speed * m_Slowdown;
-	if (!(CheckCollision<BoxCollider>(m_CameraTarget).empty())) { transform->translation.y -= directionY * m_Speed; }
-
-	//Update camera pos
-	auto cameraPos = m_RegistryPtr->GetComponent<Transform>(m_CameraTarget);
-	camera.target = Vector2{ transform->translation.x , transform->translation.y };
-}*/
 
 float SystemManager::GetDistance(Entity entity1, Entity entity2)
 {
 	//Get translations of both entities
-	auto pos1 =  m_RegistryPtr->GetComponent<Transform>(entity1)->translation;
-	auto pos2 =  m_RegistryPtr->GetComponent<Transform>(entity2)->translation;
+	auto pos1 =  m_RegistryPtr->GetComponent<Transform2D>(entity1)->position;
+	auto pos2 =  m_RegistryPtr->GetComponent<Transform2D>(entity2)->position;
 
 	//Calculate x and y distance
 	float xDist = pos1.x - pos2.x;

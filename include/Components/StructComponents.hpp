@@ -1,17 +1,16 @@
 #pragma once
 
 #include <vector>
+#include <map>
 
 #include <raylib.h>
 
 #include "Components/Vec2.hpp"
 
-//Small amout of custom structs
-
-struct Physics
+struct Transform2D
 {
-	Vector3 acceleration = { 0,0 };
-	Vector3 velocity = { 0,0 };
+	Vec2 position;
+	Vec2 scale;
 };
 
 struct SphereCollider
@@ -26,7 +25,8 @@ struct BoxCollider
 };
 
 struct RoomTemplate {
-	std::vector<std::vector<int>> entityMap;
+	int templateID;
+	Vec2 position;
 };
 
 struct Sprite

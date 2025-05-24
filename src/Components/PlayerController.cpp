@@ -15,7 +15,7 @@ PlayerController::PlayerController(Entity player, Camera2D* cameraPtr, Registry*
 
 void PlayerController::update(float dt)
 {
-	auto transform = m_RegistryPtr->GetComponent<Transform>(m_Player);
+	auto transform = m_RegistryPtr->GetComponent<Transform2D>(m_Player);
 
 	int directionX = 0, directionY = 0;
 
@@ -40,12 +40,12 @@ void PlayerController::update(float dt)
 
 	//Move entity then check for collision
 	
-	transform->translation.x += directionX * m_speed * m_SystemPtr->GetSlowdownValue();
-	if (!(m_SystemPtr->CheckCollision<BoxCollider>(m_Player).empty())) { transform->translation.x -= directionX * m_speed; }
-	transform->translation.y += directionY * m_speed * m_SystemPtr->GetSlowdownValue();
-	if (!(m_SystemPtr->CheckCollision<BoxCollider>(m_Player).empty())) { transform->translation.y -= directionY * m_speed; }
+	transform->position.x += directionX * m_speed * m_SystemPtr->GetSlowdownValue();
+	if (!(m_SystemPtr->CheckCollision<BoxCollider>(m_Player).empty())) { transform->position.x -= directionX * m_speed; }
+	transform->position.y += directionY * m_speed * m_SystemPtr->GetSlowdownValue();
+	if (!(m_SystemPtr->CheckCollision<BoxCollider>(m_Player).empty())) { transform->position.y -= directionY * m_speed; }
 	
 	//Update camera pos
-	auto cameraPos = m_RegistryPtr->GetComponent<Transform>(m_Player);
-	m_cameraPtr->target = Vector2{ transform->translation.x , transform->translation.y };
+	//auto cameraPos = m_RegistryPtr->GetComponent<Transform2D>(m_Player);
+	m_cameraPtr->target = Vector2{ transform->position.x , transform->position.y };
 }

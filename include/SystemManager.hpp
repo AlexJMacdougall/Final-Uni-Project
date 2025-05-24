@@ -45,9 +45,22 @@ private:
 	float m_Slowdown = 1.0;
 
 	Camera2D camera = { 0 };
-	Entity m_CameraTarget;
+	Entity m_PlayerEntity;
 	int screenWidth = 1280;
 	int screenHeight = 720;
+
+	std::map<std::string, Vec2> directionVectors = {
+	{"Down",Vec2{0,1}},
+	{"Left",Vec2{-1,0}},
+	{"Right",Vec2{1,0}},
+	{"Up",Vec2{0,-1}}
+	};
+	std::map<std::string, std::string> directionOpposites = {
+	{"Down","Up"},
+	{"Left","Right"},
+	{"Right","Left"},
+	{"Up","Down"}
+	};
 
 	//SpriteSheets
 	Texture LevelSprites;
@@ -92,8 +105,8 @@ inline std::set<Entity> SystemManager::CheckCollision(Entity checkEntity)
 		//Box to box collision
 		for (Entity colliderEntity : boxColliderEntities)
 		{
-			auto pos1 = m_RegistryPtr->GetComponent<Transform>(checkEntity)->translation;
-			auto pos2 = m_RegistryPtr->GetComponent<Transform>(colliderEntity)->translation;
+			auto pos1 = m_RegistryPtr->GetComponent<Transform2D>(checkEntity)->position;
+			auto pos2 = m_RegistryPtr->GetComponent<Transform2D>(colliderEntity)->position;
 
 			auto collider1 = m_RegistryPtr->GetComponent<BoxCollider>(checkEntity);
 			auto collider2 = m_RegistryPtr->GetComponent<BoxCollider>(colliderEntity);

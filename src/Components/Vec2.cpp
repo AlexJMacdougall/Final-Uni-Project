@@ -2,8 +2,17 @@
 
 Vec2 Vec2Add(Vec2 v1, Vec2 v2)
 {
-    Vec2 result = { v1.x + v2.x, v1.y + v2.y };
-    return result;
+    return Vec2{ v1.x + v2.x, v1.y + v2.y };
+}
+
+Vec2 Vec2Minus(Vec2 v1, Vec2 v2)
+{
+    return Vec2{ v1.x - v2.x, v1.y - v2.y };
+}
+
+Vec2 Vec2MultiplyInt(Vec2 vec, int multi)
+{
+    return Vec2{ vec.x * multi,vec.y * multi };
 }
 
 bool CompareVec2(Vec2 v1, Vec2 v2)
