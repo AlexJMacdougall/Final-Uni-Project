@@ -78,13 +78,13 @@ bool LevelManager::CheckForRoom(Vec2 pos)
 
 void LevelManager::Move(std::string dir)
 {
+	std::cout << "Move" << std::endl;
 	//Check there is a room in the direction passed in
 	std::cout << "Moving in direction: " << directionVectors[dir].x << ", " << directionVectors[dir].y << "(" << dir << ")" << std::endl;
 	if (CheckForRoom(Vec2Add(m_CurrentPos, directionVectors[dir])))
 	{
 		m_CurrentPos = Vec2Add(m_CurrentPos, directionVectors[dir]);
 		std::cout << m_CurrentPos.x << " " << m_CurrentPos.y << std::endl;
-		loadedRoom = false;
 	}
 	else
 	{
@@ -109,6 +109,7 @@ int LevelManager::GetRoomID(Vec2 pos)
 
 void LevelManager::LoadCurrentRoom()
 {
+	std::cout << "Load" << std::endl;
 	//Clear old room entities
 	for (Entity entity : m_CurrentRoomEntities) 
 	{ 
@@ -128,9 +129,9 @@ void LevelManager::LoadCurrentRoom()
 	}
 }
 
-Entity LevelManager::GetDoorEntity(std::string dir)
+std::set<Entity> LevelManager::GetDoorEntities()
 {
-	return m_CurrentRoomDoorEntities[dir];
+	return m_CurrentRoomDoorEntities;
 }
 
 void LevelManager::Build(int id, int x, int y,Vec2 size)
@@ -144,7 +145,6 @@ void LevelManager::Build(int id, int x, int y,Vec2 size)
 	
 	switch (id) {
 	case(0): //Blank Space
-
 		break;
 
 	case(1): //Floor
@@ -162,18 +162,19 @@ void LevelManager::Build(int id, int x, int y,Vec2 size)
 		else if (x == size.x - 1) { direction = "Right"; }
 		else if (y == 0) { direction = "Up"; }
 		else if (y == size.y - 1) { direction = "Down"; }
-		
+
 		if (CheckForRoom(Vec2Add(directionVectors[direction], m_CurrentPos)))
 		{
+			std::cout << direction << std::endl;
 			m_RegistryPtr->AddComponent<Sprite>(newEntity, { {0,0,32,32},1,1 });
 
-			DoorScript doorScript = DoorScript(newEntity, m_PlayerEntity, m_RegistryPtr,&doorInteracted, direction);
+			DoorScript doorScript = DoorScript(newEntity, m_RegistryPtr, m_PlayerEntity, direction);
 			ScriptComponent doorComp = ScriptComponent();
 			doorComp.attachScript<DoorScript>(doorScript);
 
 			m_RegistryPtr->AddComponent<ScriptComponent>(newEntity, doorComp);
 
-			m_CurrentRoomDoorEntities.insert({ direction,newEntity });
+			m_CurrentRoomDoorEntities.insert(newEntity);
 		}
 		else
 		{

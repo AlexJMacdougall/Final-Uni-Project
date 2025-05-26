@@ -39,16 +39,40 @@ SystemManager::~SystemManager()
 
 void SystemManager::Update(float dt)
 {
+	//Draw all entities
+	this->Draw();
+
 	//Run entity scripts
 	this->RunScripts(dt);
 
-	//Check if the current room has been loaded
-	if (!m_LevelManagerPtr->loadedRoom)
+	//Check if the door entities have been interacted with
+	for(Entity door:m_LevelManagerPtr->GetDoorEntities())
 	{
-		m_LevelManagerPtr->loadedRoom = true;
-		m_LevelManagerPtr->LoadCurrentRoom();
+		DoorScript* doorScript = m_RegistryPtr->GetComponent<ScriptComponent>(door)->GetScript<DoorScript>();
+		if(doorScript->playerHasInteracted())
+		{
+			std::string movedDirection = doorScript->GetDirection();
+
+			m_LevelManagerPtr->Move(movedDirection);
+			m_LevelManagerPtr->LoadCurrentRoom();
+
+			//Set player's position to next to the opposite door in the new room
+			for (Entity oppositeDoor : m_LevelManagerPtr->GetDoorEntities())
+			{
+				DoorScript* oppositeDoorScript = m_RegistryPtr->GetComponent<ScriptComponent>(oppositeDoor)->GetScript<DoorScript>();
+				if(oppositeDoorScript->GetDirection() == directionOpposites[movedDirection])
+				{
+					Vec2 oppositeDoorPos = m_RegistryPtr->GetComponent<Transform2D>(oppositeDoor)->position;
+					Vec2 offset = Vec2MultiplyInt(directionVectors[directionOpposites[movedDirection]], 33);
+					m_RegistryPtr->GetComponent<Transform2D>(m_PlayerEntity)->position = Vec2Minus(oppositeDoorPos, offset);
+					break;
+				}
+			}
+			break;
+		}
 	}
 
+	/*
 	if (m_LevelManagerPtr->doorInteracted != "None")
 	{
 		std::string movedDirection = m_LevelManagerPtr->doorInteracted;
@@ -59,25 +83,19 @@ void SystemManager::Update(float dt)
 		//Set player's position to next to the opposite door in the new room
 		Entity door = m_LevelManagerPtr->GetDoorEntity(directionOpposites[movedDirection]);
 		Vec2 doorPos = m_RegistryPtr->GetComponent<Transform2D>(door)->position;
-		Vec2 offset = Vec2MultiplyInt(directionVectors[directionOpposites[movedDirection]],32);
+		Vec2 offset = Vec2MultiplyInt(directionVectors[directionOpposites[movedDirection]],33);
 
 		m_RegistryPtr->GetComponent<Transform2D>(m_PlayerEntity)->position = Vec2Minus(doorPos, offset);
 	}
+	*/
 
-
-	//Draw all entities
-	this->Draw();
+	//Check if the first room has been loaded
+	if (!m_LevelManagerPtr->loadedFirstRoom)
+	{
+		m_LevelManagerPtr->loadedFirstRoom = true;
+		m_LevelManagerPtr->LoadCurrentRoom();
+	}
 }
-
-void SystemManager::SetPlayer(Entity target)
-{
-	this->m_PlayerEntity = target;
-
-	auto targetPos = m_RegistryPtr->GetComponent<Transform2D>(m_PlayerEntity)->position;
-
-	camera.target = Vector2{ targetPos.x, targetPos.y};
-}
-
 
 void SystemManager::RunScripts(float dt)
 {
@@ -154,4 +172,13 @@ void SystemManager::SetSlowdownValue(float slowdown)
 Camera2D* SystemManager::GetCamera()
 {
 	return &camera;
+}
+
+void SystemManager::SetPlayer(Entity target)
+{
+	this->m_PlayerEntity = target;
+
+	auto targetPos = m_RegistryPtr->GetComponent<Transform2D>(m_PlayerEntity)->position;
+
+	camera.target = Vector2{ targetPos.x, targetPos.y };
 }

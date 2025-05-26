@@ -4,13 +4,13 @@
 #include "Components/PlayerController.hpp"
 
 PlayerController::PlayerController(Entity player, Camera2D* cameraPtr, Registry* registryPtr, SystemManager* systemPtr) :
-	Script()
+	Script(player,registryPtr)
 {
 	m_Player = player;
 	m_cameraPtr = cameraPtr;
 	m_RegistryPtr = registryPtr;
 	m_SystemPtr = systemPtr;
-	m_speed = 2;
+	m_speed = 100;
 }
 
 void PlayerController::update(float dt)
@@ -40,10 +40,10 @@ void PlayerController::update(float dt)
 
 	//Move entity then check for collision
 	
-	transform->position.x += directionX * m_speed * m_SystemPtr->GetSlowdownValue();
-	if (!(m_SystemPtr->CheckCollision<BoxCollider>(m_Player).empty())) { transform->position.x -= directionX * m_speed; }
-	transform->position.y += directionY * m_speed * m_SystemPtr->GetSlowdownValue();
-	if (!(m_SystemPtr->CheckCollision<BoxCollider>(m_Player).empty())) { transform->position.y -= directionY * m_speed; }
+	transform->position.x += directionX * m_speed * dt * m_SystemPtr->GetSlowdownValue();
+	if (!(m_SystemPtr->CheckCollision<BoxCollider>(m_Player).empty())) { transform->position.x -= directionX * m_speed * dt; }
+	transform->position.y += directionY * m_speed * dt * m_SystemPtr->GetSlowdownValue();
+	if (!(m_SystemPtr->CheckCollision<BoxCollider>(m_Player).empty())) { transform->position.y -= directionY * m_speed * dt; }
 	
 	//Update camera pos
 	//auto cameraPos = m_RegistryPtr->GetComponent<Transform2D>(m_Player);

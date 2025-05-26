@@ -19,8 +19,10 @@ by Jeffery Myers is marked with CC0 1.0. To view a copy of this license, visit h
 #include "SystemManager.hpp"
 #include "Components/ScriptComponent.hpp"
 #include "Components/PlayerController.hpp"
+#include "Components/MeleeEnemyScript.hpp"
 #include "Components/Vec2.hpp"
 
+const int SPRITE_SIZE = 32;
 
 int main ()
 {
@@ -37,6 +39,7 @@ int main ()
 	Registry REGISTRY;
 	REGISTRY.RegisterComponent<Transform2D>();
 	REGISTRY.RegisterComponent<Sprite>();
+	REGISTRY.RegisterComponent<AnimatedSprite>();
 	REGISTRY.RegisterComponent<SphereCollider>();
 	REGISTRY.RegisterComponent<BoxCollider>();
 	REGISTRY.RegisterComponent<ScriptComponent>();
@@ -51,12 +54,20 @@ int main ()
 	Entity player = REGISTRY.CreateEntity();
 
 	REGISTRY.AddComponent<Transform2D>(player, Transform2D{ Vec2{192,192},Vec2{1,1}});
-	REGISTRY.AddComponent<Sprite>(player, Sprite{ {0,0,32,32},1,1 });
+	REGISTRY.AddComponent<Sprite>(player, Sprite{ {0,0,SPRITE_SIZE,SPRITE_SIZE},1,2 });
 	REGISTRY.AddComponent<BoxCollider>(player, BoxCollider{ 32.0f,32.0f });
 
 	PlayerController playerScript = PlayerController(player,SYSTEM.GetCamera(), &REGISTRY,&SYSTEM );
 	REGISTRY.AddComponent<ScriptComponent>(player, ScriptComponent());
 	REGISTRY.GetComponent<ScriptComponent>(player)->attachScript<PlayerController>(playerScript);
+
+	Entity enemy = REGISTRY.CreateEntity();
+
+	REGISTRY.AddComponent<Transform2D>(enemy, Transform2D{ Vec2{192,192},Vec2{1,1} });
+	//REGISTRY.AddComponent<AnimatedSprite>(enemy, AnimatedSprite{ Sprite{ {0,0,SPRITE_SIZE,SPRITE_SIZE},1,1 } });
+
+	REGISTRY.AddComponent<ScriptComponent>(enemy, ScriptComponent());
+	REGISTRY.GetComponent<ScriptComponent>(enemy)->attachScript<MeleeEnemyScript>(MeleeEnemyScript(enemy,&REGISTRY,player));
 
 	SYSTEM.SetPlayer(player);
 	LEVEL.SetPlayer(player);

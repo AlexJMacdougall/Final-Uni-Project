@@ -35,3 +35,18 @@ struct Sprite
 	int SpriteSheetID;
 	int Layer = 0; //Default layer
 };
+
+const int NUM_OF_ANIMATIONS = 4;
+
+struct Animation
+{
+	Vec2 startRect;
+	int frames;
+};
+
+struct AnimatedSprite {
+	Sprite sprite;
+	float frameTime;
+	std::array<Animation, NUM_OF_ANIMATIONS> animationData;
+};
+

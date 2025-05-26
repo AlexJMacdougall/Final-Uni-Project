@@ -12,16 +12,14 @@ using Entity = std::uint32_t;
 class DoorScript : public Script
 {
 public:
-	DoorScript(Entity entity, Entity player, Registry* registryPtr, std::string* interactDirection, std::string dir);
+	DoorScript(Entity entity, Registry* registryPtr, Entity m_PlayerEntity, std::string dir);
 
 	void update(float dt) override;
+	bool playerHasInteracted();
+	std::string GetDirection();
 private:
-	Entity m_Entity;
 	Entity m_PlayerEntity;
-	Registry* m_RegistryPtr;
-	std::string* m_InteractDirection;
 	std::string m_Direction;
 	float m_InteractRange;
-
-	float GetDistance(Entity entity1, Entity entity2);
+	bool m_PlayerInteracted = false;
 };

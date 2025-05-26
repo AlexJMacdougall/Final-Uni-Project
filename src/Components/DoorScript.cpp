@@ -2,12 +2,9 @@
 #include "Components/DoorScript.hpp"
 #include <iostream>
 
-DoorScript::DoorScript(Entity entity, Entity player, Registry* registryPtr,std::string* interactDirection, std::string dir) :
-	Script(),
-	m_Entity(entity),
+DoorScript::DoorScript(Entity entity, Registry* registryPtr, Entity player, std::string dir) :
+	Script(entity,registryPtr),
 	m_PlayerEntity(player),
-	m_RegistryPtr(registryPtr),
-	m_InteractDirection(interactDirection),
 	m_Direction(dir)
 {
 	m_InteractRange = 40;
@@ -15,23 +12,18 @@ DoorScript::DoorScript(Entity entity, Entity player, Registry* registryPtr,std::
 
 void DoorScript::update(float dt)
 {	
-	if (GetDistance(m_Entity, m_PlayerEntity) < m_InteractRange && IsKeyPressed(KEY_E)) 
+	if (GetDistance(m_AttachedEntity, m_PlayerEntity) < m_InteractRange && IsKeyPressed(KEY_E)) 
 	{ 
-		*m_InteractDirection = m_Direction;
+		m_PlayerInteracted = true;
 	}
 }
 
-float DoorScript::GetDistance(Entity entity1, Entity entity2)
+bool DoorScript::playerHasInteracted()
 {
-	//Get translations of both entities
-	auto pos1 = m_RegistryPtr->GetComponent<Transform2D>(entity1)->position;
-	auto pos2 = m_RegistryPtr->GetComponent<Transform2D>(entity2)->position;
+	return m_PlayerInteracted;
+}
 
-	//Calculate x and y distance
-	float xDist = pos1.x - pos2.x;
-	float yDist = pos1.y - pos2.y;
-
-	//Use pythagoras to calculate Distance
-	float dist = sqrt((xDist * xDist) + (yDist * yDist));
-	return dist;
+std::string DoorScript::GetDirection()
+{
+	return m_Direction;
 }

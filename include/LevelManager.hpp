@@ -74,10 +74,10 @@ public:
 
 	void LoadCurrentRoom();
 
-	Entity GetDoorEntity(std::string dir);
+	std::set<Entity> GetDoorEntities();
 
 	//Bad implementation, FIX///////////////////////////////////
-	float loadedRoom = false;
+	float loadedFirstRoom = false;
 	std::string doorInteracted = "None";
 	///////////////////////////////////////////////////////////
 
@@ -93,7 +93,7 @@ private:
 	//Set of all entities that make up current room - used for deletion later
 	std::set<Entity> m_CurrentRoomEntities;
 	//Contains the current room's door entities - used to check if they have been interacted with
-	std::map<std::string,Entity> m_CurrentRoomDoorEntities;
+	std::set<Entity> m_CurrentRoomDoorEntities;
 
 	std::map<std::string, Vec2> directionVectors = {
 	{"Down",Vec2{0,1}},
