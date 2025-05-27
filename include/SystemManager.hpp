@@ -15,6 +15,7 @@ using Entity = std::uint32_t;
 
 const int NUM_OF_SPRITESHEETS = 2;
 const int NUM_OF_LAYERS = 3;
+const int SPRITE_SIZE = 32;
 
 class SystemManager
 {
@@ -26,7 +27,10 @@ public:
 	void Update(float dt);
 	void RunScripts(float dt);
 	void Draw();
-	//void SystemManager::PlayerInput(float dt);
+	void Animate(float dt);
+
+	SpriteSheet* GetSpriteSheet(std::string ID);
+
 	float GetDistance(Entity entity1, Entity entity2);
 
 	float GetSlowdownValue();
@@ -62,12 +66,9 @@ private:
 	{"Up","Down"}
 	};
 
-	//SpriteSheets
-	Texture LevelSprites;
-	Texture PlayerSprites;
 
-	//Map with pointers to Spritesheets, allow sprites to access them
-	std::array<Texture*,NUM_OF_SPRITESHEETS> m_SpriteSheets;
+	//SpriteSheets
+	std::vector<SpriteSheet> m_SpriteSheets;
 };
 
 template<typename t>

@@ -31,22 +31,31 @@ struct RoomTemplate {
 
 struct Sprite
 {
-	Rectangle textureRect;
-	int SpriteSheetID;
+	Vec2 UV;
+	std::string SpriteSheetID;
 	int Layer = 0; //Default layer
 };
 
-const int NUM_OF_ANIMATIONS = 4;
+struct SpriteSheet {
+	std::string ID;
+	Texture textures;
+	Vec2 size;
+	float spriteSize;
+};
 
 struct Animation
 {
 	Vec2 startRect;
 	int frames;
+	int currentFrame = 0;
 };
 
 struct AnimatedSprite {
-	Sprite sprite;
+	Sprite* entitySprite;
 	float frameTime;
-	std::array<Animation, NUM_OF_ANIMATIONS> animationData;
+	float currentFrameTime = 0;
+	std::map<std::string, Animation> animationData;
+	std::string currentAnimation;
+	std::string lastAnimationFrame;
 };
 

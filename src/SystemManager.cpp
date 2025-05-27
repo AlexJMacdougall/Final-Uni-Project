@@ -20,13 +20,12 @@ SystemManager::SystemManager(Registry* registryPtr, LevelManager* levelPtr,int s
 	camera.rotation = 0.0f;
 	camera.zoom = 1.0f;
 
-	LevelSprites = LoadTexture("LevelSprites.png");
-	PlayerSprites = LoadTexture("PlayerSprites.png");
 
 	m_SpriteSheets = 
 	{ 
-		&LevelSprites,
-		&PlayerSprites 
+		{"LevelSprites",LoadTexture("LevelSprites.png"),{5,2},SPRITE_SIZE},
+		{"Player",LoadTexture("PlayerSprites.png"),{5,2},SPRITE_SIZE},
+		{"Enemy",LoadTexture("EnemySprites.png"),{5,4},SPRITE_SIZE}
 	};
 
 	SetTargetFPS(60);
@@ -34,11 +33,14 @@ SystemManager::SystemManager(Registry* registryPtr, LevelManager* levelPtr,int s
 
 SystemManager::~SystemManager()
 {
-	for (auto texPtr : m_SpriteSheets) { UnloadTexture(*texPtr); }
+	for (auto spriteSheet : m_SpriteSheets) { UnloadTexture(spriteSheet.textures); }
 }
 
 void SystemManager::Update(float dt)
 {
+	//Animate Sprites
+	this->Animate(dt*m_Slowdown);
+
 	//Draw all entities
 	this->Draw();
 
@@ -120,6 +122,8 @@ void SystemManager::Draw()
 	//Get entities that are drawable
 	std::set<Entity> entities = m_RegistryPtr->GetEntitiesWithComponent<Sprite>();
 
+	Rectangle textureRect = { 0,0,SPRITE_SIZE,SPRITE_SIZE };
+
 	for (int currentLayer = 0; currentLayer < NUM_OF_LAYERS; currentLayer++)
 	{
 		for (Entity entity : entities)
@@ -133,15 +137,112 @@ void SystemManager::Draw()
 				auto transform = m_RegistryPtr->GetComponent<Transform2D>(entity);
 
 				Vector2 position = { transform->position.x,transform->position.y };
-				Texture* spriteSheet = m_SpriteSheets[sprite->SpriteSheetID];
+				SpriteSheet* spriteSheet = GetSpriteSheet(sprite->SpriteSheetID);
+				Texture textures = spriteSheet->textures;
+
+				//Set textureRect
+				textureRect.x = sprite->UV.x * spriteSheet->spriteSize;
+				textureRect.y = sprite->UV.y * spriteSheet->spriteSize;
+				
+				//if (entity == m_PlayerEntity) { std::cout << sprite->UV.x << " " << sprite->UV.y << std::endl; }
 
 				//Draw Texture
-				DrawTextureRec(*spriteSheet, sprite->textureRect, position, WHITE);
+				DrawTextureRec(textures, textureRect, position, WHITE);
 			}
 		}
 	}
 	EndMode2D();
 	EndDrawing();
+}
+
+void SystemManager::Animate(float dt)
+{
+	//Get entities that have animated sprites
+	std::set<Entity> entities = m_RegistryPtr->GetEntitiesWithComponent<AnimatedSprite>();
+
+	for(Entity entity : entities)
+	{
+		auto animatedSprite = m_RegistryPtr->GetComponent<AnimatedSprite>(entity);
+		bool updateSprite = false;
+
+		//std::cout << animatedSprite->currentAnimation << " " << animatedSprite->lastAnimationFrame << std::endl;
+
+		//Check if the entities animation has changed
+		if(animatedSprite->currentAnimation == animatedSprite->lastAnimationFrame)
+		{
+			//If the same animation is still being played, check if next frame should be shown
+			if(animatedSprite->currentFrameTime > 0)
+			{
+				//If time is not finished for current frame, decrease timer
+				animatedSprite->currentFrameTime -= dt;
+			}
+			else
+			{
+				//Check if increasing frame will exceed number of frames in animation
+				if(animatedSprite->animationData[animatedSprite->currentAnimation].currentFrame + 1 == animatedSprite->animationData[animatedSprite->currentAnimation].frames)
+				{
+					//If on last frame of animation, reset to first one
+					animatedSprite->animationData[animatedSprite->currentAnimation].currentFrame = 0;
+				}
+				else
+				{
+					//Increase frame by one
+					animatedSprite->animationData[animatedSprite->currentAnimation].currentFrame += 1;
+				}
+				//Reset timer
+				animatedSprite->currentFrameTime = animatedSprite->frameTime;
+				updateSprite = true;
+			}
+		}
+		else
+		{
+			//Update last animated frame to currentAnimation
+			animatedSprite->lastAnimationFrame = animatedSprite->currentAnimation;
+			//Set currentAnimation frame to zero
+			animatedSprite->animationData[animatedSprite->currentAnimation].currentFrame = 0;
+			//Reset frame timer
+			animatedSprite->currentFrameTime = animatedSprite->frameTime;
+			updateSprite = true;
+		}
+
+		//If the frame has changed, update entity sprite
+		if(updateSprite)
+		{
+			//Get sprite and spritesheet data
+			auto sprite = m_RegistryPtr->GetComponent<Sprite>(entity);
+			Vec2 spriteSheetSize = GetSpriteSheet(sprite->SpriteSheetID)->size;
+
+			//Calculate UV
+			Vec2 newUV = animatedSprite->animationData[animatedSprite->currentAnimation].startRect;
+
+			for(int i = 0; i< animatedSprite->animationData[animatedSprite->currentAnimation].currentFrame;i++)
+			{
+				std::cout << spriteSheetSize.x << std::endl;
+				if (newUV.x + 1 < spriteSheetSize.x)
+				{
+					newUV.x += 1; 
+				}
+				else 
+				{ 
+					newUV.x = 0; 
+					newUV.y += 1; 
+				}
+			}
+			//Set sprite UV to current frame UV
+			sprite->UV = Vec2Add(Vec2{ 0,0 },newUV);
+		}
+	}
+}
+
+SpriteSheet* SystemManager::GetSpriteSheet(std::string ID)
+{
+	for(SpriteSheet spriteSheet : m_SpriteSheets)
+	{
+		if (spriteSheet.ID == ID)
+		{ 
+			return &spriteSheet; 
+		}
+	}
 }
 
 float SystemManager::GetDistance(Entity entity1, Entity entity2)

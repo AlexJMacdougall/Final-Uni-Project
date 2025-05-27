@@ -20,15 +20,17 @@ void PlayerController::update(float dt)
 	int directionX = 0, directionY = 0;
 
 	//Check for keypresses
-	if (IsKeyDown(KEY_D) || IsKeyDown(KEY_A))
+	if (IsKeyDown(KEY_D) || IsKeyDown(KEY_A) || IsKeyDown(KEY_W) || IsKeyDown(KEY_S))
 	{
+		m_RegistryPtr->GetComponent<AnimatedSprite>(m_Player)->currentAnimation = "Walk";
 		directionX = IsKeyDown(KEY_D) - IsKeyDown(KEY_A);
-	}
-	if (IsKeyDown(KEY_W) || IsKeyDown(KEY_S))
-	{
 		directionY = IsKeyDown(KEY_S) - IsKeyDown(KEY_W);
 	}
-	
+	else
+	{
+		m_RegistryPtr->GetComponent<AnimatedSprite>(m_Player)->currentAnimation = "Idle";
+	}
+
 	if (IsKeyPressed(KEY_Q))
 	{
 		m_SystemPtr->SetSlowdownValue(0.5);

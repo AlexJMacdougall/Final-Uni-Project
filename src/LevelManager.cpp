@@ -148,11 +148,11 @@ void LevelManager::Build(int id, int x, int y,Vec2 size)
 		break;
 
 	case(1): //Floor
-		m_RegistryPtr->AddComponent<Sprite>(newEntity, { {0,32,32,32},0 });
+		m_RegistryPtr->AddComponent<Sprite>(newEntity, { {0,1},"LevelSprites" });
 		break;
 
 	case(2)://Wall
-		m_RegistryPtr->AddComponent<Sprite>(newEntity, { {0,0,32,32},0 });
+		m_RegistryPtr->AddComponent<Sprite>(newEntity, { {0,0},"LevelSprites" });
 		m_RegistryPtr->AddComponent<BoxCollider>(newEntity, BoxCollider{ 32,32 });
 		break;
 
@@ -166,7 +166,7 @@ void LevelManager::Build(int id, int x, int y,Vec2 size)
 		if (CheckForRoom(Vec2Add(directionVectors[direction], m_CurrentPos)))
 		{
 			std::cout << direction << std::endl;
-			m_RegistryPtr->AddComponent<Sprite>(newEntity, { {0,0,32,32},1,1 });
+			m_RegistryPtr->AddComponent<Sprite>(newEntity, { {0,1},"LevelSprites" });
 
 			DoorScript doorScript = DoorScript(newEntity, m_RegistryPtr, m_PlayerEntity, direction);
 			ScriptComponent doorComp = ScriptComponent();
@@ -178,7 +178,7 @@ void LevelManager::Build(int id, int x, int y,Vec2 size)
 		}
 		else
 		{
-			m_RegistryPtr->AddComponent<Sprite>(newEntity, { {0,0,32,32},0 });
+			m_RegistryPtr->AddComponent<Sprite>(newEntity, { {0,0},"LevelSprites"});
 			m_RegistryPtr->AddComponent<BoxCollider>(newEntity, BoxCollider{ 32,32 });
 		}
 		

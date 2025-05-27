@@ -22,9 +22,7 @@ by Jeffery Myers is marked with CC0 1.0. To view a copy of this license, visit h
 #include "Components/MeleeEnemyScript.hpp"
 #include "Components/Vec2.hpp"
 
-const int SPRITE_SIZE = 32;
-
-int main ()
+int main()
 {
 	// Tell the window to use vsync and work on high DPI displays
 	SetConfigFlags(FLAG_VSYNC_HINT | FLAG_WINDOW_HIGHDPI);
@@ -47,28 +45,42 @@ int main ()
 	LevelManager LEVEL(&REGISTRY);
 	LEVEL.GenerateLevel(10);
 
-	SystemManager SYSTEM(&REGISTRY,&LEVEL,1280,720);
+	SystemManager SYSTEM(&REGISTRY, &LEVEL, 1280, 720);
 
 	//Instantiate entities
 	//Player
 	Entity player = REGISTRY.CreateEntity();
 
-	REGISTRY.AddComponent<Transform2D>(player, Transform2D{ Vec2{192,192},Vec2{1,1}});
-	REGISTRY.AddComponent<Sprite>(player, Sprite{ {0,0,SPRITE_SIZE,SPRITE_SIZE},1,2 });
+	REGISTRY.AddComponent<Transform2D>(player, Transform2D{ Vec2{192,192},Vec2{1,1} });
 	REGISTRY.AddComponent<BoxCollider>(player, BoxCollider{ 32.0f,32.0f });
 
-	PlayerController playerScript = PlayerController(player,SYSTEM.GetCamera(), &REGISTRY,&SYSTEM );
+	Sprite playerSprite = Sprite{ {0,0},"Player",2 };
+	REGISTRY.AddComponent<Sprite>(player, playerSprite);
+	AnimatedSprite playerAnimations = AnimatedSprite{ &playerSprite,0.2f };
+	playerAnimations.animationData["Idle"] = Animation{Vec2{0,0},5};
+	playerAnimations.animationData["Walk"] = Animation{Vec2{0,1},5};
+	playerAnimations.currentAnimation = "Idle";
+	REGISTRY.AddComponent<AnimatedSprite>(player, playerAnimations);
+
+	PlayerController playerScript = PlayerController(player, SYSTEM.GetCamera(), &REGISTRY, &SYSTEM);
 	REGISTRY.AddComponent<ScriptComponent>(player, ScriptComponent());
 	REGISTRY.GetComponent<ScriptComponent>(player)->attachScript<PlayerController>(playerScript);
 
 	Entity enemy = REGISTRY.CreateEntity();
 
 	REGISTRY.AddComponent<Transform2D>(enemy, Transform2D{ Vec2{192,192},Vec2{1,1} });
-	//REGISTRY.AddComponent<AnimatedSprite>(enemy, AnimatedSprite{ Sprite{ {0,0,SPRITE_SIZE,SPRITE_SIZE},1,1 } });
+
+	Sprite enemySprite = Sprite{ {0,0},"Enemy",2 };
+	REGISTRY.AddComponent<Sprite>(enemy, enemySprite);
+	AnimatedSprite enemyAnimations = AnimatedSprite{ &enemySprite,0.2f };
+	enemyAnimations.animationData["Idle"] = Animation{ Vec2{0,0},5 };
+	enemyAnimations.animationData["Walk"] = Animation{ Vec2{0,1},5 };
+	enemyAnimations.currentAnimation = "Idle";
+	REGISTRY.AddComponent<AnimatedSprite>(enemy, enemyAnimations);
 
 	REGISTRY.AddComponent<ScriptComponent>(enemy, ScriptComponent());
 	REGISTRY.GetComponent<ScriptComponent>(enemy)->attachScript<MeleeEnemyScript>(MeleeEnemyScript(enemy,&REGISTRY,player));
-
+	
 	SYSTEM.SetPlayer(player);
 	LEVEL.SetPlayer(player);
 
