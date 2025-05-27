@@ -165,8 +165,6 @@ void SystemManager::Animate(float dt)
 		auto animatedSprite = m_RegistryPtr->GetComponent<AnimatedSprite>(entity);
 		bool updateSprite = false;
 
-		//std::cout << animatedSprite->currentAnimation << " " << animatedSprite->lastAnimationFrame << std::endl;
-
 		//Check if the entities animation has changed
 		if(animatedSprite->currentAnimation == animatedSprite->lastAnimationFrame)
 		{
@@ -217,7 +215,6 @@ void SystemManager::Animate(float dt)
 
 			for(int i = 0; i< animatedSprite->animationData[animatedSprite->currentAnimation].currentFrame;i++)
 			{
-				std::cout << spriteSheetSize.x << std::endl;
 				if (newUV.x + 1 < spriteSheetSize.x)
 				{
 					newUV.x += 1; 

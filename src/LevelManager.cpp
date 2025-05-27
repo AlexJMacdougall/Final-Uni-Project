@@ -12,11 +12,8 @@ LevelManager::LevelManager(Registry* registryPtr):
 
 void LevelManager::GenerateLevel(int targetRoomNum)
 {
-	//Clear old level entites
+	//Clear old level 
 	m_Rooms = {};
-
-	Entity currentRoom;
-	Entity newRoom;
 
 	Vec2 currentPos = {0,0};
 	Vec2 newPos;

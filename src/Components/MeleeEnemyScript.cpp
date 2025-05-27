@@ -21,12 +21,14 @@ void MeleeEnemyScript::update(float dt)
 {
 	//Update rules
 	InMeleeRange = (GetDistance(m_AttachedEntity, m_PlayerEntity) < m_MeleeRange);
-	DoingAttackWindup = (m_Timers["Windup"] != 0);
+	auto sprite = m_RegistryPtr->GetComponent<AnimatedSprite>(m_AttachedEntity);
+	DoingAttackWindup = (sprite->currentAnimation == "Windup" && sprite->currentFrameTime != 0);
+	//DoingAttack = (sprite->currentAnimation == "Windup" != 0);
 	DoingAttackRecovery = (m_Timers["Recovery"] != 0);
 
 	//Check if enemy is dead - outside of switch because it is the same regardless of state
 	if (m_Health < 0.0f) { m_CurrentState = Dead; }
-	/*
+	
 	switch (m_CurrentState)
 	{
 	case Dead:
@@ -38,18 +40,14 @@ void MeleeEnemyScript::update(float dt)
 		std::cout << "Chasing!" << std::endl;
 		if (InMeleeRange) { 
 			std::cout << "Starting Attack!" << std::endl;
-			m_CurrentState = AttackWindup; 
+			m_CurrentState = Attack; 
 		}
 		break;
-	case AttackWindup:
-		if(!DoingAttackWindup)
-	case AttackRecovery:
 	case Attack:
 		std::cout << "Attack" << std::endl;
 		//Do attack//
 		break;
 	}
-	*/
 }
 void MeleeEnemyScript::ApplyDamage(float damage)
 {
