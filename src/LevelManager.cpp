@@ -28,8 +28,6 @@ void LevelManager::GenerateLevel(int targetRoomNum)
 	m_Rooms.push_back(RoomTemplate{ 0,currentPos });
 	int numOfRooms = 1;
 
-	std::cout << "Position: " << currentPos.x << " " << currentPos.y << " ID: " << 0 << std::endl;
-
 	while(numOfRooms<targetRoomNum)
 	{
 		//Randomly select direction to move in
@@ -44,8 +42,6 @@ void LevelManager::GenerateLevel(int targetRoomNum)
 			int roomID = rand() % NUM_OF_ROOM_TEMPLATES;
 			m_Rooms.push_back(RoomTemplate{roomID,newPos});
 			numOfRooms += 1;
-
-			std::cout << "Position: " << newPos.x << " " << newPos.y << " ID: " << roomID << std::endl;
 		}
 
 		//Step to new position
@@ -78,13 +74,10 @@ bool LevelManager::CheckForRoom(Vec2 pos)
 
 void LevelManager::Move(std::string dir)
 {
-	std::cout << "Move" << std::endl;
 	//Check there is a room in the direction passed in
-	std::cout << "Moving in direction: " << directionVectors[dir].x << ", " << directionVectors[dir].y << "(" << dir << ")" << std::endl;
 	if (CheckForRoom(Vec2Add(m_CurrentPos, directionVectors[dir])))
 	{
 		m_CurrentPos = Vec2Add(m_CurrentPos, directionVectors[dir]);
-		std::cout << m_CurrentPos.x << " " << m_CurrentPos.y << std::endl;
 	}
 	else
 	{
@@ -109,7 +102,6 @@ int LevelManager::GetRoomID(Vec2 pos)
 
 void LevelManager::LoadCurrentRoom()
 {
-	std::cout << "Load" << std::endl;
 	//Clear old room entities
 	for (Entity entity : m_CurrentRoomEntities) 
 	{ 
@@ -149,6 +141,7 @@ void LevelManager::Build(int id, int x, int y,Vec2 size)
 
 	case(1): //Floor
 		m_RegistryPtr->AddComponent<Sprite>(newEntity, { {0,1},"LevelSprites" });
+		m_RegistryPtr->AddComponent<Navmesh>(newEntity, { Vec2{(float)x,(float)y} });
 		break;
 
 	case(2)://Wall
@@ -165,7 +158,6 @@ void LevelManager::Build(int id, int x, int y,Vec2 size)
 
 		if (CheckForRoom(Vec2Add(directionVectors[direction], m_CurrentPos)))
 		{
-			std::cout << direction << std::endl;
 			m_RegistryPtr->AddComponent<Sprite>(newEntity, { {0,1},"LevelSprites" });
 
 			DoorScript doorScript = DoorScript(newEntity, m_RegistryPtr, m_PlayerEntity, direction);

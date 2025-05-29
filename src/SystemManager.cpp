@@ -143,8 +143,6 @@ void SystemManager::Draw()
 				//Set textureRect
 				textureRect.x = sprite->UV.x * spriteSheet->spriteSize;
 				textureRect.y = sprite->UV.y * spriteSheet->spriteSize;
-				
-				//if (entity == m_PlayerEntity) { std::cout << sprite->UV.x << " " << sprite->UV.y << std::endl; }
 
 				//Draw Texture
 				DrawTextureRec(textures, textureRect, position, WHITE);
@@ -165,8 +163,6 @@ void SystemManager::Animate(float dt)
 		auto animatedSprite = m_RegistryPtr->GetComponent<AnimatedSprite>(entity);
 		bool updateSprite = false;
 
-		//std::cout << animatedSprite->currentAnimation << " " << animatedSprite->lastAnimationFrame << std::endl;
-
 		//Check if the entities animation has changed
 		if(animatedSprite->currentAnimation == animatedSprite->lastAnimationFrame)
 		{
@@ -183,6 +179,8 @@ void SystemManager::Animate(float dt)
 				{
 					//If on last frame of animation, reset to first one
 					animatedSprite->animationData[animatedSprite->currentAnimation].currentFrame = 0;
+					//Update finishedAnimation bool - used to check if animations that should only play once are finished
+					animatedSprite->finishedAnimation = true;
 				}
 				else
 				{
@@ -202,6 +200,8 @@ void SystemManager::Animate(float dt)
 			animatedSprite->animationData[animatedSprite->currentAnimation].currentFrame = 0;
 			//Reset frame timer
 			animatedSprite->currentFrameTime = animatedSprite->frameTime;
+			//Set finishedAnimation bool to false
+			animatedSprite->finishedAnimation = false;
 			updateSprite = true;
 		}
 
@@ -217,7 +217,6 @@ void SystemManager::Animate(float dt)
 
 			for(int i = 0; i< animatedSprite->animationData[animatedSprite->currentAnimation].currentFrame;i++)
 			{
-				std::cout << spriteSheetSize.x << std::endl;
 				if (newUV.x + 1 < spriteSheetSize.x)
 				{
 					newUV.x += 1; 

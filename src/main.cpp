@@ -36,6 +36,7 @@ int main()
 	//Set up Registry and SystemManager
 	Registry REGISTRY;
 	REGISTRY.RegisterComponent<Transform2D>();
+	REGISTRY.RegisterComponent<Navmesh>();
 	REGISTRY.RegisterComponent<Sprite>();
 	REGISTRY.RegisterComponent<AnimatedSprite>();
 	REGISTRY.RegisterComponent<SphereCollider>();
@@ -70,12 +71,16 @@ int main()
 
 	REGISTRY.AddComponent<Transform2D>(enemy, Transform2D{ Vec2{192,192},Vec2{1,1} });
 
-	Sprite enemySprite = Sprite{ {0,0},"Enemy",2 };
+	Sprite enemySprite = Sprite{ {0,0},"Enemy",1 };
 	REGISTRY.AddComponent<Sprite>(enemy, enemySprite);
 	AnimatedSprite enemyAnimations = AnimatedSprite{ &enemySprite,0.2f };
+
 	enemyAnimations.animationData["Idle"] = Animation{ Vec2{0,0},5 };
-	enemyAnimations.animationData["Walk"] = Animation{ Vec2{0,1},5 };
-	enemyAnimations.currentAnimation = "Idle";
+	enemyAnimations.animationData["Move"] = Animation{ Vec2{0,1},5 };
+	enemyAnimations.animationData["Windup"] = Animation{ Vec2{0,2},3 };
+	enemyAnimations.animationData["Attack"] = Animation{ Vec2{3,2},3 };
+	enemyAnimations.animationData["Recovery"] = Animation{ Vec2{1,3},3 };
+
 	REGISTRY.AddComponent<AnimatedSprite>(enemy, enemyAnimations);
 
 	REGISTRY.AddComponent<ScriptComponent>(enemy, ScriptComponent());

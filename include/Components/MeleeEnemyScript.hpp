@@ -4,6 +4,7 @@
 #include <map>
 
 #include "Components/ScriptComponent.hpp"
+#include "Components/StructComponents.hpp"
 #include "Registry.hpp"
 
 using Entity = std::uint32_t;
@@ -32,8 +33,7 @@ private:
 	bool IsDead = false;
 	bool DoingAttackWindup = false;
 	bool DoingAttackRecovery = false;
-	bool DoingAttackAnimation = false;
-	bool CurrentlyAttacking = false;
+	bool DoingAttack = false;
 
 	enum State 
 	{
@@ -50,7 +50,23 @@ private:
 	std::map<std::string, float> m_Timers =
 	{
 		{"Stun",0.0f},
-		{"Windup",0.0f},
-		{"Recovery",0.0f}, 
 	};
+
+	std::array<Vec2,4> directionVectors =
+	{
+		Vec2{0,1},
+		Vec2{0,-1},
+		Vec2{1,0},
+		Vec2{-1,0}
+	};
+
+	//Pathing to player
+	void Move_Towards(Vec2 target,float dt);
+	void Get_Path(Entity target);
+	std::list<Entity> Search(Entity targetEntity, Entity currentNavmeshPoint,std::set<Entity>);
+
+	std::set<Entity> m_Navmesh;
+	std::list<Entity> m_MovePath;
+
+	std::set<Entity> testEntities;//DEBUG///////REMOVE
 };
