@@ -34,7 +34,7 @@ private:
 	bool DoingAttackWindup = false;
 	bool DoingAttackRecovery = false;
 	bool DoingAttack = false;
-	bool CheckPath = false;
+	bool ReachedTargetPos = false;
 
 	enum State 
 	{
@@ -51,7 +51,6 @@ private:
 	std::map<std::string, float> m_Timers =
 	{
 		{"Stun",0.0f},
-		{"Path",0.0f}
 	};
 
 	std::array<Vec2,4> directionVectors =
@@ -70,5 +69,10 @@ private:
 	std::set<Entity> m_Navmesh;
 	std::list<Entity> m_MovePath;
 
-	std::set<Entity> testEntities;//DEBUG///////REMOVE
+	Entity moveTarget;
+	bool gotFirstTarget = false;
+
+	std::set<Entity> testEntities;
 };
+
+

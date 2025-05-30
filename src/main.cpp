@@ -52,7 +52,7 @@ int main()
 	//Player
 	Entity player = REGISTRY.CreateEntity();
 
-	REGISTRY.AddComponent<Transform2D>(player, Transform2D{ Vec2{192,192},Vec2{1,1} });
+	REGISTRY.AddComponent<Transform2D>(player, Transform2D{ Vec2{150,150},Vec2{1,1} });
 	REGISTRY.AddComponent<BoxCollider>(player, BoxCollider{ 32.0f,32.0f });
 
 	Sprite playerSprite = Sprite{ {0,0},"Player",2 };
@@ -69,7 +69,8 @@ int main()
 
 	Entity enemy = REGISTRY.CreateEntity();
 
-	REGISTRY.AddComponent<Transform2D>(enemy, Transform2D{ Vec2{192,192},Vec2{1,1} });
+	REGISTRY.AddComponent<Transform2D>(enemy, Transform2D{ Vec2{300,300},Vec2{1,1} });
+	REGISTRY.AddComponent<BoxCollider>(enemy, BoxCollider{ 32.0f,32.0f });
 
 	Sprite enemySprite = Sprite{ {0,0},"Enemy",1 };
 	REGISTRY.AddComponent<Sprite>(enemy, enemySprite);

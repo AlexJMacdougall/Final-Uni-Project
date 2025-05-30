@@ -25,7 +25,7 @@ void LevelManager::GenerateLevel(int targetRoomNum)
 	srand(time(NULL));
 
 	//Create starting room, always template 0
-	m_Rooms.push_back(RoomTemplate{ 0,currentPos });
+	m_Rooms.push_back(RoomTemplate{ 1,currentPos });
 	int numOfRooms = 1;
 
 	while(numOfRooms<targetRoomNum)
