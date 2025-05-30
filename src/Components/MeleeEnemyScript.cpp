@@ -66,7 +66,18 @@ void MeleeEnemyScript::update(float dt)
 			std::cout << std::endl;
 
 			//m_CurrentState = Dead;
-			//auto pos = m_RegistryPtr->GetComponent<Transform2D>(m_MovePath.back())->position;
+			if(m_MovePath.size() != 0)
+			{ 
+				std::cout << "Here 1" << std::endl;
+				auto pos = m_RegistryPtr->GetComponent<Transform2D>(m_MovePath.back())->position; 
+				Move_Towards(pos, dt);
+			}
+			else
+			{
+				std::cout << "Here 2" << std::endl;
+				Move_Towards(m_RegistryPtr->GetComponent<Transform2D>(m_PlayerEntity)->position,dt);
+			}
+
 			//auto currentPos = m_RegistryPtr->GetComponent<Transform2D>(m_AttachedEntity)->position;
 			
 			for (Entity test : testEntities) { m_RegistryPtr->DestroyEntity(test); }
@@ -136,7 +147,7 @@ void MeleeEnemyScript::Get_Path(Entity target)
 	m_MovePath = {};
 
 	//Get first square
-	Vec2 navmeshPos = { int(currentPos.x / 32),int(currentPos.y / 32) }; //32 is size of sprite; change if it is different
+	Vec2 navmeshPos = { int((currentPos.x+16) / 32),int((currentPos.y+16) / 32) }; //32 is size of sprite; change if it is different
 	Entity firstNavmeshPoint;
 
 	for(Entity entity : m_Navmesh)
