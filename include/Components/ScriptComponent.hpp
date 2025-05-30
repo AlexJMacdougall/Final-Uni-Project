@@ -31,7 +31,7 @@ protected:
 
 		//Use pythagoras to calculate Distance
 		float dist = sqrt((xDist * xDist) + (yDist * yDist));
-		return dist;
+		return abs(dist);
 	}
 };
 

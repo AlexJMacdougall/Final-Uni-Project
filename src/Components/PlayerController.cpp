@@ -50,4 +50,5 @@ void PlayerController::update(float dt)
 	//Update camera pos
 	//auto cameraPos = m_RegistryPtr->GetComponent<Transform2D>(m_Player);
 	m_cameraPtr->target = Vector2{ transform->position.x , transform->position.y };
+
 }

@@ -57,5 +57,9 @@ struct AnimatedSprite {
 	std::map<std::string, Animation> animationData;
 	std::string currentAnimation;
 	std::string lastAnimationFrame;
+	bool finishedAnimation = false;
 };
 
+struct Navmesh {
+	Vec2 pos;
+};
