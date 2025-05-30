@@ -51,8 +51,13 @@ void MeleeEnemyScript::update(float dt)
 
 			m_Navmesh = m_RegistryPtr->GetEntitiesWithComponent<Navmesh>();
 
+			m_MovePath = {};
 			Get_Path(m_PlayerEntity);
-			m_CurrentState = Dead;
+
+			for (Entity entity : m_MovePath) { std::cout << entity; }
+			std::cout << std::endl;
+
+			//m_CurrentState = Dead;
 			//auto pos = m_RegistryPtr->GetComponent<Transform2D>(m_MovePath.back())->position;
 			//auto currentPos = m_RegistryPtr->GetComponent<Transform2D>(m_AttachedEntity)->position;
 			/*
@@ -187,7 +192,7 @@ std::list<Entity> MeleeEnemyScript::Search(Entity targetEntity, Entity currentNa
 	//Check that there are possible directions
 	if(possibleDirections.size() != 0)
 	{
-		for (Entity dir : possibleDirections) { std::cout << m_RegistryPtr->GetComponent<Transform2D>(dir)->position.x << ", " << m_RegistryPtr->GetComponent<Transform2D>(dir)->position.y << std::endl; }
+		//for (Entity dir : possibleDirections) { std::cout << m_RegistryPtr->GetComponent<Transform2D>(dir)->position.x << ", " << m_RegistryPtr->GetComponent<Transform2D>(dir)->position.y << std::endl; }
 		//Find which is closest to the target pos
 		float lowestDistance = 1000;
 		Entity closestEntity = possibleDirections.front();
@@ -201,6 +206,7 @@ std::list<Entity> MeleeEnemyScript::Search(Entity targetEntity, Entity currentNa
 				lowestDistance = newDistance;
 				closestEntity = entity;
 				searchedPositions.insert(closestEntity);
+				if (GetDistance(closestEntity, m_PlayerEntity)) { return path; }
 			}
 		}
 		//Repeat starting from closest entity
