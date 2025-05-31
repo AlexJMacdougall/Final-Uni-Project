@@ -12,8 +12,6 @@ MeleeEnemyScript::MeleeEnemyScript(Entity entity,Registry* registryPtr,Entity pl
 	m_Speed = 110.0f;
 	m_MeleeRange = 50.0f;
 
-	recalcOnTraversed = 4;
-
 	m_Navmesh = m_RegistryPtr->GetEntitiesWithComponent<Navmesh>();
 	Get_Path(m_PlayerEntity);
 
@@ -31,12 +29,11 @@ void MeleeEnemyScript::update(float dt)
 	DoingAttackWindup = (!(sprite->finishedAnimation) && sprite->currentAnimation == "Windup");
 	DoingAttack = (!(sprite->finishedAnimation) && sprite->currentAnimation == "Attack");
 	DoingAttackRecovery = (!(sprite->finishedAnimation) && sprite->currentAnimation == "Recovery");
-	Recalc = (squaresTraversed <= recalcOnTraversed);
 	//
 
 	//Check if enemy is dead - outside of switch because it is the same regardless of state
 	if (m_Health < 0.0f) { m_CurrentState = Dead; }
-	
+
 	switch (m_CurrentState)
 	{
 	case Dead:
@@ -60,18 +57,13 @@ void MeleeEnemyScript::update(float dt)
 				Move_Towards(m_RegistryPtr->GetComponent<Transform2D>(moveTarget)->position, dt);
 				if (GetDistance(moveTarget, m_AttachedEntity) <= 1)
 				{
-					squaresTraversed += 1;
 					m_MovePath.pop_front(); 
 				}
 			}
 			else
 			{
-				Move_Towards(m_RegistryPtr->GetComponent<Transform2D>(m_PlayerEntity)->position,dt);
 				Get_Path(m_PlayerEntity);
-				squaresTraversed = 0;
 			}
-
-			if (Recalc) { Get_Path(m_PlayerEntity); }
 
 			//DEBUG//
 			/*
@@ -152,6 +144,9 @@ void MeleeEnemyScript::Get_Path(Entity target)
 
 	m_MovePath = {};
 
+	//Keep track of how many interations; block if too many
+	int iter = 0;
+
 	//Get first square
 	Vec2 navmeshPos = { int((currentPos.x + 1) / 32),int((currentPos.y + 1) / 32) }; //32 is size of sprite; change if it is different
 	Entity firstNavmeshPoint;
@@ -162,7 +157,7 @@ void MeleeEnemyScript::Get_Path(Entity target)
 		if (CompareVec2(square->pos, navmeshPos))
 		{
 			firstNavmeshPoint = entity;
-			m_MovePath.splice(m_MovePath.begin(), Search(target, firstNavmeshPoint, std::set<Entity>{}));
+			m_MovePath.splice(m_MovePath.begin(), Search(target, firstNavmeshPoint, std::set<Entity>{}, iter));
 			break;
 		}
 	}
@@ -174,8 +169,10 @@ void MeleeEnemyScript::Get_Path(Entity target)
 	//DEBUG ////////////// REMOVE
 }
 
-std::list<Entity> MeleeEnemyScript::Search(Entity targetEntity, Entity currentNavmeshPoint,std::set<Entity> searchedPositions)
+std::list<Entity> MeleeEnemyScript::Search(Entity targetEntity, Entity currentNavmeshPoint,std::set<Entity> searchedPositions,int iter)
 {
+	if (iter > max_Iterations) { return std::list<Entity>{}; }
+
 	Entity nextEntity;
 	Vec2 nextPosition;
 	Vec2 currentPos = m_RegistryPtr->GetComponent<Navmesh>(currentNavmeshPoint)->pos;
@@ -218,7 +215,8 @@ std::list<Entity> MeleeEnemyScript::Search(Entity targetEntity, Entity currentNa
 		}
 		//Repeat starting from closest entity
 		path.push_back(closestEntity);
-		path.splice(path.end(), Search(m_PlayerEntity, closestEntity,searchedPositions));
+		iter += 1;
+		path.splice(path.end(), Search(m_PlayerEntity, closestEntity,searchedPositions,iter));
 	}
 	else
 	{

@@ -66,16 +66,13 @@ private:
 	//Pathing to player
 	void Move_Towards(Vec2 target,float dt);
 	void Get_Path(Entity target);
-	std::list<Entity> Search(Entity targetEntity, Entity currentNavmeshPoint,std::set<Entity>);
+	std::list<Entity> Search(Entity targetEntity, Entity currentNavmeshPoint,std::set<Entity>,int iter);
 
 	std::set<Entity> m_Navmesh;
 	std::list<Entity> m_MovePath;
 
-	int squaresTraversed = 0;
-	int recalcOnTraversed;
-
 	Entity moveTarget;
-	bool gotFirstTarget = false;
+	int max_Iterations = 30;
 
 	std::set<Entity> testEntities;
 };
