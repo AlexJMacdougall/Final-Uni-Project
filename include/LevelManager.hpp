@@ -9,6 +9,7 @@
 
 #include "Components/StructComponents.hpp"
 #include "Components/ScriptComponent.hpp"
+#include "Components/MeleeEnemyScript.hpp"
 #include "Components/DoorScript.hpp"
 #include "Components/Vec2.hpp"
 #include "Registry.hpp"
@@ -25,7 +26,7 @@ const std::array<std::vector<std::vector<int>>, NUM_OF_ROOM_TEMPLATES> ROOM_TEMP
 			{2,1,1,1,1,1,1,1,1,1,1,1,2},
 			{2,1,1,1,1,1,1,1,1,1,1,1,2},
 			{2,1,1,1,1,1,1,1,1,1,1,1,2},
-			{3,1,1,1,1,1,1,1,1,1,1,1,3},
+			{3,1,1,1,1,1,4,1,1,1,1,1,3},
 			{2,1,1,1,1,1,1,1,1,1,1,1,2},
 			{2,1,1,1,1,1,1,1,1,1,1,1,2},
 			{2,1,1,1,1,1,1,1,1,1,1,1,2},

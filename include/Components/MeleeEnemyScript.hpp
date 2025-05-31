@@ -5,6 +5,7 @@
 
 #include "Components/ScriptComponent.hpp"
 #include "Components/StructComponents.hpp"
+#include "Components/PlayerController.hpp"
 #include "Registry.hpp"
 
 using Entity = std::uint32_t;
@@ -34,7 +35,8 @@ private:
 	bool DoingAttackWindup = false;
 	bool DoingAttackRecovery = false;
 	bool DoingAttack = false;
-	bool ReachedTargetPos = false;
+	bool Recalc = false;
+	bool hitPlayer = false;
 
 	enum State 
 	{
@@ -68,6 +70,9 @@ private:
 
 	std::set<Entity> m_Navmesh;
 	std::list<Entity> m_MovePath;
+
+	int squaresTraversed = 0;
+	int recalcOnTraversed;
 
 	Entity moveTarget;
 	bool gotFirstTarget = false;

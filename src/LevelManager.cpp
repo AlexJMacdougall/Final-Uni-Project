@@ -170,11 +170,39 @@ void LevelManager::Build(int id, int x, int y,Vec2 size)
 		}
 		else
 		{
-			m_RegistryPtr->AddComponent<Sprite>(newEntity, { {0,0},"LevelSprites"});
-			m_RegistryPtr->AddComponent<BoxCollider>(newEntity, BoxCollider{ 32,32 });
+			Build(2, x, y, size);
 		}
 		
 		break;
+
+	case(4): //Enemy Spawn
+
+		Build(1, x, y, size);
+		{
+		Entity enemy = m_RegistryPtr->CreateEntity();
+
+		m_RegistryPtr->AddComponent<Transform2D>(enemy, Transform2D{ Vec2{300,300},Vec2{1,1} });
+		m_RegistryPtr->AddComponent<BoxCollider>(enemy, BoxCollider{ 32.0f,32.0f });
+
+		Sprite enemySprite = Sprite{ {0,0},"Enemy",1 };
+		m_RegistryPtr->AddComponent<Sprite>(enemy, enemySprite);
+		AnimatedSprite enemyAnimations = AnimatedSprite{ &enemySprite,0.2f };
+
+		enemyAnimations.animationData["Idle"] = Animation{ Vec2{0,0},5 };
+		enemyAnimations.animationData["Move"] = Animation{ Vec2{0,1},5 };
+		enemyAnimations.animationData["Windup"] = Animation{ Vec2{0,2},3 };
+		enemyAnimations.animationData["Attack"] = Animation{ Vec2{3,2},3 };
+		enemyAnimations.animationData["Recovery"] = Animation{ Vec2{1,3},3 };
+
+		m_RegistryPtr->AddComponent<AnimatedSprite>(enemy, enemyAnimations);
+
+		m_RegistryPtr->AddComponent<ScriptComponent>(enemy, ScriptComponent());
+		m_RegistryPtr->GetComponent<ScriptComponent>(enemy)->attachScript<MeleeEnemyScript>(MeleeEnemyScript(enemy, m_RegistryPtr, m_PlayerEntity));
+
+		m_CurrentRoomEntities.insert(enemy);
+		}
+		break;
+
 	default:
 		m_RegistryPtr->DestroyEntity(newEntity);
 		m_CurrentRoomEntities.erase(newEntity);

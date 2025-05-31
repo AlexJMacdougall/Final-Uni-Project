@@ -63,29 +63,9 @@ int main()
 	playerAnimations.currentAnimation = "Idle";
 	REGISTRY.AddComponent<AnimatedSprite>(player, playerAnimations);
 
-	PlayerController playerScript = PlayerController(player, SYSTEM.GetCamera(), &REGISTRY, &SYSTEM);
+	PlayerController playerScript = PlayerController(player, SYSTEM.GetCamera(), &REGISTRY);
 	REGISTRY.AddComponent<ScriptComponent>(player, ScriptComponent());
 	REGISTRY.GetComponent<ScriptComponent>(player)->attachScript<PlayerController>(playerScript);
-
-	Entity enemy = REGISTRY.CreateEntity();
-
-	REGISTRY.AddComponent<Transform2D>(enemy, Transform2D{ Vec2{300,300},Vec2{1,1} });
-	REGISTRY.AddComponent<BoxCollider>(enemy, BoxCollider{ 32.0f,32.0f });
-
-	Sprite enemySprite = Sprite{ {0,0},"Enemy",1 };
-	REGISTRY.AddComponent<Sprite>(enemy, enemySprite);
-	AnimatedSprite enemyAnimations = AnimatedSprite{ &enemySprite,0.2f };
-
-	enemyAnimations.animationData["Idle"] = Animation{ Vec2{0,0},5 };
-	enemyAnimations.animationData["Move"] = Animation{ Vec2{0,1},5 };
-	enemyAnimations.animationData["Windup"] = Animation{ Vec2{0,2},3 };
-	enemyAnimations.animationData["Attack"] = Animation{ Vec2{3,2},3 };
-	enemyAnimations.animationData["Recovery"] = Animation{ Vec2{1,3},3 };
-
-	REGISTRY.AddComponent<AnimatedSprite>(enemy, enemyAnimations);
-
-	REGISTRY.AddComponent<ScriptComponent>(enemy, ScriptComponent());
-	REGISTRY.GetComponent<ScriptComponent>(enemy)->attachScript<MeleeEnemyScript>(MeleeEnemyScript(enemy,&REGISTRY,player));
 	
 	SYSTEM.SetPlayer(player);
 	LEVEL.SetPlayer(player);
@@ -95,22 +75,6 @@ int main()
 	{
 		float dt = GetFrameTime();
 		SYSTEM.Update(dt);
-		if (IsKeyPressed(KEY_UP))
-		{
-			LEVEL.Move("Up");
-		}
-		if (IsKeyPressed(KEY_DOWN))
-		{
-			LEVEL.Move("Down");
-		}
-		if (IsKeyPressed(KEY_LEFT))
-		{
-			LEVEL.Move("Left");
-		}
-		if (IsKeyPressed(KEY_RIGHT))
-		{
-			LEVEL.Move("Right");
-		}
 	}
 
 	// destroy the window and cleanup the OpenGL context

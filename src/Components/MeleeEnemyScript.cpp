@@ -8,9 +8,11 @@ MeleeEnemyScript::MeleeEnemyScript(Entity entity,Registry* registryPtr,Entity pl
 	m_PlayerEntity(player)
 {
 	m_Health = 10.0f;
-	m_Damage = 2.0f;
+	m_Damage = 10.0f;
 	m_Speed = 110.0f;
 	m_MeleeRange = 50.0f;
+
+	recalcOnTraversed = 4;
 
 	m_Navmesh = m_RegistryPtr->GetEntitiesWithComponent<Navmesh>();
 	Get_Path(m_PlayerEntity);
@@ -29,7 +31,8 @@ void MeleeEnemyScript::update(float dt)
 	DoingAttackWindup = (!(sprite->finishedAnimation) && sprite->currentAnimation == "Windup");
 	DoingAttack = (!(sprite->finishedAnimation) && sprite->currentAnimation == "Attack");
 	DoingAttackRecovery = (!(sprite->finishedAnimation) && sprite->currentAnimation == "Recovery");
-	//ReachedTargetPos = (GetDistance(moveTarget, m_AttachedEntity) < 40);
+	Recalc = (squaresTraversed <= recalcOnTraversed);
+	//
 
 	//Check if enemy is dead - outside of switch because it is the same regardless of state
 	if (m_Health < 0.0f) { m_CurrentState = Dead; }
@@ -57,15 +60,18 @@ void MeleeEnemyScript::update(float dt)
 				Move_Towards(m_RegistryPtr->GetComponent<Transform2D>(moveTarget)->position, dt);
 				if (GetDistance(moveTarget, m_AttachedEntity) <= 1)
 				{
-					//Get_Path(m_PlayerEntity);
+					squaresTraversed += 1;
 					m_MovePath.pop_front(); 
 				}
 			}
 			else
 			{
+				Move_Towards(m_RegistryPtr->GetComponent<Transform2D>(m_PlayerEntity)->position,dt);
 				Get_Path(m_PlayerEntity);
+				squaresTraversed = 0;
 			}
 
+			if (Recalc) { Get_Path(m_PlayerEntity); }
 
 			//DEBUG//
 			/*
@@ -81,7 +87,8 @@ void MeleeEnemyScript::update(float dt)
 				m_RegistryPtr->AddComponent<Transform2D>(newEntity, { {entityPos.x,entityPos.y},{1,1} });
 				m_RegistryPtr->AddComponent<Sprite>(newEntity, Sprite{ {0,0},"Enemy",1 });
 				testEntities.insert(newEntity);
-			}*/
+			}
+			*/
 		}
 		break;
 
@@ -98,6 +105,7 @@ void MeleeEnemyScript::update(float dt)
 		{
 			m_CurrentState = Chase;
 			sprite->currentAnimation = "Move";
+			hitPlayer = false;
 		}
 		break;
 
@@ -106,6 +114,14 @@ void MeleeEnemyScript::update(float dt)
 		{
 			m_CurrentState = AttackRecovery;
 			sprite->currentAnimation = "Recovery";
+		}
+		else
+		{
+			if(GetDistance(m_PlayerEntity,m_AttachedEntity) < m_MeleeRange && !hitPlayer)
+			{
+				m_RegistryPtr->GetComponent<ScriptComponent>(m_PlayerEntity)->GetScript<PlayerController>()->Damage(m_Damage);
+				hitPlayer = true;
+			}
 		}
 		break;
 	}
@@ -165,24 +181,6 @@ std::list<Entity> MeleeEnemyScript::Search(Entity targetEntity, Entity currentNa
 	Vec2 currentPos = m_RegistryPtr->GetComponent<Navmesh>(currentNavmeshPoint)->pos;
 
 	std::list<Entity> path;
-	/*
-	//Test each possible direction
-	for(Vec2 direction : directionVectors)
-	{
-		nextPosition = Vec2Add(currentPos, direction);
-		for (Entity entity : m_Navmesh)
-		{
-			if(CompareVec2(m_RegistryPtr->GetComponent<Navmesh>(entity)->pos,nextPosition))
-			{	
-				float newDistance = (GetDistance(entity, targetEntity));
-				if (newDistance < lowestDistance)
-				{
-					lowestDistance = newDistance;
-					path.splice(path.begin(), Search(targetEntity, entity,lowestDistance));
-				}
-			}
-		}
-	}*/
 
 	//Create set of all adjacent navmesh positions
 	std::list<Entity> possibleDirections;
@@ -202,7 +200,6 @@ std::list<Entity> MeleeEnemyScript::Search(Entity targetEntity, Entity currentNa
 	//Check that there are possible directions
 	if(possibleDirections.size() != 0)
 	{
-		//for (Entity dir : possibleDirections) { std::cout << m_RegistryPtr->GetComponent<Transform2D>(dir)->position.x << ", " << m_RegistryPtr->GetComponent<Transform2D>(dir)->position.y << std::endl; }
 		//Find which is closest to the target pos
 		float lowestDistance = 1000;
 		Entity closestEntity = possibleDirections.front();
@@ -213,7 +210,7 @@ std::list<Entity> MeleeEnemyScript::Search(Entity targetEntity, Entity currentNa
 			//Check that the entity hasn't been checked and that it is also closer to the target
 			if(newDistance < lowestDistance && (searchedPositions.find(entity) == searchedPositions.end()))
 			{
-				if ((GetDistance(closestEntity, m_PlayerEntity)) < m_MeleeRange * 0.75) { return path; }
+				if ((GetDistance(closestEntity, m_PlayerEntity)) < m_MeleeRange - 1) { return path; }
 				lowestDistance = newDistance;
 				closestEntity = entity;
 				searchedPositions.insert(closestEntity);

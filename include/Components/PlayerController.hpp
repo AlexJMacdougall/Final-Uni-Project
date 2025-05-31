@@ -2,22 +2,27 @@
 
 #include "Components/ScriptComponent.hpp"
 #include "Registry.hpp"
-#include "SystemManager.hpp"
 
 using Entity = uint32_t;
 
 class PlayerController : public Script
 {
 public:
-	PlayerController::PlayerController(Entity player, Camera2D* cameraPtr, Registry* registryPtr,SystemManager* systemPtr);
+	PlayerController(Entity player, Camera2D* cameraPtr, Registry* registryPtr);
 
-	void PlayerController::update(float dt) override;
+	void update(float dt) override;
+
+	void Damage(float damage);
+
+	float m_slowdown;
 private:
 	Entity m_Player;
 	Camera2D* m_cameraPtr;
 	Registry* m_RegistryPtr;
-	SystemManager* m_SystemPtr;
+
+	std::set<Entity> CheckCollision();
 
 	float m_speed;
+	float m_health;
 };
 

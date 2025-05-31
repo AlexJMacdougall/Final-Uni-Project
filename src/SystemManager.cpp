@@ -45,7 +45,7 @@ void SystemManager::Update(float dt)
 	this->Draw();
 
 	//Run entity scripts
-	this->RunScripts(dt);
+	this->RunScripts(dt * m_Slowdown);
 
 	//Check if the door entities have been interacted with
 	for(Entity door:m_LevelManagerPtr->GetDoorEntities())
@@ -109,6 +109,8 @@ void SystemManager::RunScripts(float dt)
 	{
 		m_RegistryPtr->GetComponent<ScriptComponent>(entity)->update(dt);
 	}
+
+	m_Slowdown = m_RegistryPtr->GetComponent<ScriptComponent>(m_PlayerEntity)->GetScript<PlayerController>()->m_slowdown;
 }
 
 void SystemManager::Draw()
