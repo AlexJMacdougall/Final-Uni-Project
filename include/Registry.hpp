@@ -73,6 +73,8 @@ inline void Registry::AddComponent(Entity entity,T component)
 
 	//Update entity signature
 	m_Signatures->at(entity).set(m_typenameToComponentTypes[typeName], true);
+
+	if ((std::string)typeName == (std::string)("class ScriptComponent")) { std::cout << "Added component " << typeName << " to Entity " << entity << std::endl; }
 }
 
 template<typename T>
@@ -118,6 +120,8 @@ inline T* Registry::GetComponent(Entity entity)
 	//Check if entity has component of type T
 	//If you failed this assertion you tried to get a component from an entity that doesnt have one of that type
 	assert(m_Signatures->at(entity).test(m_typenameToComponentTypes[typeid(T).name()]));
+
+	if ((std::string)typeid(T).name() == (std::string)("class ScriptComponent")) { std::cout << "Getting component " << typeid(T).name() << " for entity " << entity << std::endl; }
 
 	return GetComponentArray<T>()->GetComponent(entity);
 }

@@ -20,10 +20,9 @@ const int SPRITE_SIZE = 32;
 class SystemManager
 {
 public:
-	SystemManager(Registry* registryPtr,LevelManager* LEVEL, int screenWidth, int screenHeight);
+	SystemManager(Registry* registryPtr, int screenWidth, int screenHeight);
 	~SystemManager();
 
-	void SetPlayer(Entity target);
 	void Update(float dt);
 	void RunScripts(float dt);
 	void Draw();
@@ -40,16 +39,17 @@ public:
 
 	template<typename t>
 	std::set<Entity> CheckCollision(Entity entity);
+
 private:
 	Registry* m_RegistryPtr;
-	LevelManager* m_LevelManagerPtr;
+	LevelManager m_LevelManager;
 
 	//Player Movement Variables
 	float m_Speed = 2;
 	float m_Slowdown = 1.0;
-
+	Entity m_PlayerEntity = -1;//Start as Entity ID that will never be made, so ResetGame can replace it
 	Camera2D camera = { 0 };
-	Entity m_PlayerEntity;
+
 	int screenWidth = 1280;
 	int screenHeight = 720;
 
@@ -66,9 +66,10 @@ private:
 	{"Up","Down"}
 	};
 
-
 	//SpriteSheets
 	std::vector<SpriteSheet> m_SpriteSheets;
+
+	void ResetGame();
 };
 
 template<typename t>

@@ -48,11 +48,13 @@ public:
 	{
 		T* scriptPtr = new T(std::forward<Args>(args)...); //Create a pointer to a new script and pass in the variadic arguments
 		m_Script = scriptPtr; //Set script to T
+		std::cout << "Attached script to component of type " << typeid(T).name() << " pointer is: " << m_Script << std::endl;
 	}
 
 	template<typename T>
 	T* GetScript()
 	{
+		std::cout << "Returning pointer to class of typename " << typeid(T).name() << " pointer is: " << m_Script << std::endl;
 		return reinterpret_cast<T*>(m_Script);
 	}
 

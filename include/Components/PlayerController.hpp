@@ -13,6 +13,9 @@ public:
 	void update(float dt) override;
 
 	void Damage(float damage);
+	bool CheckIfDead();
+	float GetHealth();
+	float GetSpeed();
 
 	float m_slowdown;
 private:

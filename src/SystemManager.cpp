@@ -7,10 +7,11 @@
 
 #include "SystemManager.hpp"
 
-SystemManager::SystemManager(Registry* registryPtr, LevelManager* levelPtr,int screenWidth,int screenHeight)
+SystemManager::SystemManager(Registry* registryPtr, int screenWidth,int screenHeight)
 {
 	m_RegistryPtr = registryPtr;
-	m_LevelManagerPtr = levelPtr;
+	m_LevelManager = LevelManager();
+	m_LevelManager.SetReigstryPtr(m_RegistryPtr);
 
 	this->screenWidth = screenWidth;
 	this->screenHeight = screenHeight;
@@ -28,6 +29,8 @@ SystemManager::SystemManager(Registry* registryPtr, LevelManager* levelPtr,int s
 		{"Enemy",LoadTexture("EnemySprites.png"),{5,4},SPRITE_SIZE}
 	};
 
+	ResetGame();
+
 	SetTargetFPS(60);
 }
 
@@ -38,64 +41,54 @@ SystemManager::~SystemManager()
 
 void SystemManager::Update(float dt)
 {
-	//Animate Sprites
-	this->Animate(dt*m_Slowdown);
-
-	//Draw all entities
-	this->Draw();
-
-	//Run entity scripts
-	this->RunScripts(dt * m_Slowdown);
-
-	//Check if the door entities have been interacted with
-	for(Entity door:m_LevelManagerPtr->GetDoorEntities())
+	//Check if the player is dead
+	std::cout << "Update------------------------------------------" << std::endl;
+	std::cout << "In update, player is "<<m_PlayerEntity<<"; ";
+	if (m_RegistryPtr->GetComponent<ScriptComponent>(m_PlayerEntity)->GetScript<PlayerController>()->CheckIfDead())
 	{
-		DoorScript* doorScript = m_RegistryPtr->GetComponent<ScriptComponent>(door)->GetScript<DoorScript>();
-		if(doorScript->playerHasInteracted())
+		std::cout << "Calling-Reset-Game------------------------------" << std::endl;
+		ResetGame();
+	}
+	else
+	{
+		//std::cout << "Debug: Damaging entity " << m_PlayerEntity << " by 100" << std::endl;
+		//m_RegistryPtr->GetComponent<ScriptComponent>(m_PlayerEntity)->GetScript<PlayerController>()->Damage(100);
+
+		//Animate Sprites
+		this->Animate(dt * m_Slowdown);
+
+		//Draw all entities
+		this->Draw();
+
+		//Run entity scripts
+		this->RunScripts(dt * m_Slowdown);
+
+		//Check if the door entities have been interacted with
+		for (Entity door : m_LevelManager.GetDoorEntities())
 		{
-			std::string movedDirection = doorScript->GetDirection();
-
-			m_LevelManagerPtr->Move(movedDirection);
-			m_LevelManagerPtr->LoadCurrentRoom();
-
-			//Set player's position to next to the opposite door in the new room
-			for (Entity oppositeDoor : m_LevelManagerPtr->GetDoorEntities())
+			DoorScript* doorScript = m_RegistryPtr->GetComponent<ScriptComponent>(door)->GetScript<DoorScript>();
+			if (doorScript->playerHasInteracted())
 			{
-				DoorScript* oppositeDoorScript = m_RegistryPtr->GetComponent<ScriptComponent>(oppositeDoor)->GetScript<DoorScript>();
-				if(oppositeDoorScript->GetDirection() == directionOpposites[movedDirection])
+				std::string movedDirection = doorScript->GetDirection();
+
+				m_LevelManager.Move(movedDirection);
+				m_LevelManager.LoadCurrentRoom();
+
+				//Set player's position to next to the opposite door in the new room
+				for (Entity oppositeDoor : m_LevelManager.GetDoorEntities())
 				{
-					Vec2 oppositeDoorPos = m_RegistryPtr->GetComponent<Transform2D>(oppositeDoor)->position;
-					Vec2 offset = Vec2MultiplyInt(directionVectors[directionOpposites[movedDirection]], 33);
-					m_RegistryPtr->GetComponent<Transform2D>(m_PlayerEntity)->position = Vec2Minus(oppositeDoorPos, offset);
-					break;
+					DoorScript* oppositeDoorScript = m_RegistryPtr->GetComponent<ScriptComponent>(oppositeDoor)->GetScript<DoorScript>();
+					if (oppositeDoorScript->GetDirection() == directionOpposites[movedDirection])
+					{
+						Vec2 oppositeDoorPos = m_RegistryPtr->GetComponent<Transform2D>(oppositeDoor)->position;
+						Vec2 offset = Vec2MultiplyInt(directionVectors[directionOpposites[movedDirection]], 33);
+						m_RegistryPtr->GetComponent<Transform2D>(m_PlayerEntity)->position = Vec2Minus(oppositeDoorPos, offset);
+						break;
+					}
 				}
+				break;
 			}
-			break;
 		}
-	}
-
-	/*
-	if (m_LevelManagerPtr->doorInteracted != "None")
-	{
-		std::string movedDirection = m_LevelManagerPtr->doorInteracted;
-		m_LevelManagerPtr->Move(movedDirection);
-		m_LevelManagerPtr->LoadCurrentRoom();
-		m_LevelManagerPtr->doorInteracted = "None";
-
-		//Set player's position to next to the opposite door in the new room
-		Entity door = m_LevelManagerPtr->GetDoorEntity(directionOpposites[movedDirection]);
-		Vec2 doorPos = m_RegistryPtr->GetComponent<Transform2D>(door)->position;
-		Vec2 offset = Vec2MultiplyInt(directionVectors[directionOpposites[movedDirection]],33);
-
-		m_RegistryPtr->GetComponent<Transform2D>(m_PlayerEntity)->position = Vec2Minus(doorPos, offset);
-	}
-	*/
-
-	//Check if the first room has been loaded
-	if (!m_LevelManagerPtr->loadedFirstRoom)
-	{
-		m_LevelManagerPtr->loadedFirstRoom = true;
-		m_LevelManagerPtr->LoadCurrentRoom();
 	}
 }
 
@@ -276,11 +269,39 @@ Camera2D* SystemManager::GetCamera()
 	return &camera;
 }
 
-void SystemManager::SetPlayer(Entity target)
+void SystemManager::ResetGame()
 {
-	this->m_PlayerEntity = target;
+	std::cout << "ResetGame------------------------------------------" << std::endl;
+	if (m_PlayerEntity != -1) 
+	{ 
+		m_RegistryPtr->DestroyEntity(m_PlayerEntity); 
+	}
 
-	auto targetPos = m_RegistryPtr->GetComponent<Transform2D>(m_PlayerEntity)->position;
+	m_PlayerEntity = m_RegistryPtr->CreateEntity();
 
-	camera.target = Vector2{ targetPos.x, targetPos.y };
+	std::cout << "Player is " << m_PlayerEntity << std::endl;
+
+	//for (Entity entity : m_RegistryPtr->GetEntitiesWithComponent<Transform2D>()) { m_RegistryPtr->DestroyEntity(entity); }
+
+	m_RegistryPtr->AddComponent<Transform2D>(m_PlayerEntity, Transform2D{ Vec2{150,150},Vec2{1,1} });
+	m_RegistryPtr->AddComponent<BoxCollider>(m_PlayerEntity, BoxCollider{ 32.0f,32.0f });
+
+	Sprite playerSprite = Sprite{ {0,0},"Player",2 };
+	m_RegistryPtr->AddComponent<Sprite>(m_PlayerEntity, playerSprite);
+	AnimatedSprite playerAnimations = AnimatedSprite{ &playerSprite,0.2f };
+	playerAnimations.animationData["Idle"] = Animation{ Vec2{0,0},5 };
+	playerAnimations.animationData["Walk"] = Animation{ Vec2{0,1},5 };
+	playerAnimations.currentAnimation = "Idle";
+	m_RegistryPtr->AddComponent<AnimatedSprite>(m_PlayerEntity, playerAnimations);
+
+	PlayerController playerController = PlayerController(m_PlayerEntity, GetCamera(), m_RegistryPtr);
+
+	ScriptComponent playerScript = ScriptComponent();
+	playerScript.attachScript<PlayerController>(playerController);
+	m_RegistryPtr->AddComponent<ScriptComponent>(m_PlayerEntity, playerScript);
+
+	m_LevelManager.SetPlayer(m_PlayerEntity);
+	m_LevelManager.GenerateLevel(10);
+	m_LevelManager.LoadCurrentRoom();
+	std::cout << "End-of-ResetGame-----------------------------" << std::endl;
 }

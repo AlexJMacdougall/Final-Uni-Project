@@ -50,15 +50,29 @@ void PlayerController::update(float dt)
 	if (!(CheckCollision().empty())) { transform->position.y -= directionY * m_speed * dt; }
 	
 	//Update camera pos
-	//auto cameraPos = m_RegistryPtr->GetComponent<Transform2D>(m_Player);
 	m_cameraPtr->target = Vector2{ transform->position.x , transform->position.y };
-
 }
 
 void PlayerController::Damage(float damage)
 {
 	m_health -= damage;
 	std::cout << "Took " << damage << " damage, health is now " << m_health<<std::endl;
+}
+
+bool PlayerController::CheckIfDead()
+{
+	std::cout << "In playerController for player " << m_AttachedEntity << " Health is " << m_health<<std::endl;
+	return (m_health <= 0);
+}
+
+float PlayerController::GetHealth()
+{
+	return m_health;
+}
+
+float PlayerController::GetSpeed()
+{
+	return m_speed;
 }
 
 std::set<Entity> PlayerController::CheckCollision()

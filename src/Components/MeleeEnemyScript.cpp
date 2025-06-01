@@ -8,8 +8,8 @@ MeleeEnemyScript::MeleeEnemyScript(Entity entity,Registry* registryPtr,Entity pl
 	m_PlayerEntity(player)
 {
 	m_Health = 10.0f;
-	m_Damage = 10.0f;
-	m_Speed = 110.0f;
+	m_Damage = 100.0f;
+	m_Speed = 90.0f;
 	m_MeleeRange = 50.0f;
 
 	m_Navmesh = m_RegistryPtr->GetEntitiesWithComponent<Navmesh>();
@@ -20,7 +20,6 @@ MeleeEnemyScript::MeleeEnemyScript(Entity entity,Registry* registryPtr,Entity pl
 
 void MeleeEnemyScript::update(float dt)
 {
-
 	//Get entity sprite
 	auto sprite = m_RegistryPtr->GetComponent<AnimatedSprite>(m_AttachedEntity);
 

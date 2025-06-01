@@ -4,19 +4,15 @@
 #include<cstdlib>
 #include<cassert>
 
-LevelManager::LevelManager(Registry* registryPtr):
-	m_RegistryPtr(registryPtr)
+LevelManager::LevelManager()
 {
 	m_CurrentPos = { 0,0 };
 }
 
 void LevelManager::GenerateLevel(int targetRoomNum)
 {
-	//Clear old level entites
+	//Clear old room data
 	m_Rooms = {};
-
-	Entity currentRoom;
-	Entity newRoom;
 
 	Vec2 currentPos = {0,0};
 	Vec2 newPos;
@@ -25,7 +21,7 @@ void LevelManager::GenerateLevel(int targetRoomNum)
 	srand(time(NULL));
 
 	//Create starting room, always template 0
-	m_Rooms.push_back(RoomTemplate{ 1,currentPos });
+	m_Rooms.push_back(RoomTemplate{ 0,currentPos });
 	int numOfRooms = 1;
 
 	while(numOfRooms<targetRoomNum)
@@ -47,6 +43,8 @@ void LevelManager::GenerateLevel(int targetRoomNum)
 		//Step to new position
 		currentPos = newPos;
 	}
+
+	m_CurrentPos = { 0,0 };
 }
 
 Vec2 LevelManager::GetCurrentPos()
@@ -57,6 +55,11 @@ Vec2 LevelManager::GetCurrentPos()
 void LevelManager::SetPlayer(Entity player)
 {
 	m_PlayerEntity = player;
+}
+
+void LevelManager::SetReigstryPtr(Registry* registryPtr)
+{
+	m_RegistryPtr = registryPtr;
 }
 
 bool LevelManager::CheckForRoom(Vec2 pos)
@@ -102,9 +105,11 @@ int LevelManager::GetRoomID(Vec2 pos)
 
 void LevelManager::LoadCurrentRoom()
 {
+	std::cout << "Load-Current-Room-----------------------" << std::endl;
 	//Clear old room entities
 	for (Entity entity : m_CurrentRoomEntities) 
 	{ 
+		std::cout << ") Destroying entity " << entity <<", type: "<< typeid(entity).name() << std::endl;
 		m_RegistryPtr->DestroyEntity(entity); 
 	}
 	m_CurrentRoomEntities = {};
@@ -150,61 +155,85 @@ void LevelManager::Build(int id, int x, int y,Vec2 size)
 		break;
 
 	case(3)://Door
-		//Find which direction this door is
-		if (x == 0) { direction = "Left"; }
-		else if (x == size.x - 1) { direction = "Right"; }
-		else if (y == 0) { direction = "Up"; }
-		else if (y == size.y - 1) { direction = "Down"; }
-
-		if (CheckForRoom(Vec2Add(directionVectors[direction], m_CurrentPos)))
-		{
-			m_RegistryPtr->AddComponent<Sprite>(newEntity, { {0,1},"LevelSprites" });
-
-			DoorScript doorScript = DoorScript(newEntity, m_RegistryPtr, m_PlayerEntity, direction);
-			ScriptComponent doorComp = ScriptComponent();
-			doorComp.attachScript<DoorScript>(doorScript);
-
-			m_RegistryPtr->AddComponent<ScriptComponent>(newEntity, doorComp);
-
-			m_CurrentRoomDoorEntities.insert(newEntity);
-		}
-		else
-		{
-			Build(2, x, y, size);
-		}
-		
+		m_RegistryPtr->DestroyEntity(newEntity);
+		m_CurrentRoomEntities.erase(newEntity);
+		SpawnDoor(x,y,size);
 		break;
 
 	case(4): //Enemy Spawn
 
 		Build(1, x, y, size);
-		{
-		Entity enemy = m_RegistryPtr->CreateEntity();
 
-		m_RegistryPtr->AddComponent<Transform2D>(enemy, Transform2D{ Vec2{300,300},Vec2{1,1} });
-		m_RegistryPtr->AddComponent<BoxCollider>(enemy, BoxCollider{ 32.0f,32.0f });
+		m_RegistryPtr->DestroyEntity(newEntity);
+		m_CurrentRoomEntities.erase(newEntity);
 
-		Sprite enemySprite = Sprite{ {0,0},"Enemy",1 };
-		m_RegistryPtr->AddComponent<Sprite>(enemy, enemySprite);
-		AnimatedSprite enemyAnimations = AnimatedSprite{ &enemySprite,0.2f };
+		m_CurrentRoomEntities.insert(SpawnEnemy(x,y));
 
-		enemyAnimations.animationData["Idle"] = Animation{ Vec2{0,0},5 };
-		enemyAnimations.animationData["Move"] = Animation{ Vec2{0,1},5 };
-		enemyAnimations.animationData["Windup"] = Animation{ Vec2{0,2},3 };
-		enemyAnimations.animationData["Attack"] = Animation{ Vec2{3,2},3 };
-		enemyAnimations.animationData["Recovery"] = Animation{ Vec2{1,3},3 };
-
-		m_RegistryPtr->AddComponent<AnimatedSprite>(enemy, enemyAnimations);
-
-		m_RegistryPtr->AddComponent<ScriptComponent>(enemy, ScriptComponent());
-		m_RegistryPtr->GetComponent<ScriptComponent>(enemy)->attachScript<MeleeEnemyScript>(MeleeEnemyScript(enemy, m_RegistryPtr, m_PlayerEntity));
-
-		m_CurrentRoomEntities.insert(enemy);
-		}
 		break;
 
 	default:
 		m_RegistryPtr->DestroyEntity(newEntity);
 		m_CurrentRoomEntities.erase(newEntity);
+	}
+}
+
+Entity LevelManager::SpawnEnemy(int x, int y)
+{
+	Entity enemy = m_RegistryPtr->CreateEntity();
+
+	m_RegistryPtr->AddComponent<Transform2D>(enemy, Transform2D{ Vec2{300,300},Vec2{1,1} });
+	m_RegistryPtr->AddComponent<BoxCollider>(enemy, BoxCollider{ 32.0f,32.0f });
+
+	Sprite enemySprite = Sprite{ {0,0},"Enemy",1 };
+	m_RegistryPtr->AddComponent<Sprite>(enemy, enemySprite);
+	AnimatedSprite enemyAnimations = AnimatedSprite{ &enemySprite,0.2f };
+
+	enemyAnimations.animationData["Idle"] = Animation{ Vec2{0,0},5 };
+	enemyAnimations.animationData["Move"] = Animation{ Vec2{0,1},5 };
+	enemyAnimations.animationData["Windup"] = Animation{ Vec2{0,2},3 };
+	enemyAnimations.animationData["Attack"] = Animation{ Vec2{3,2},3 };
+	enemyAnimations.animationData["Recovery"] = Animation{ Vec2{1,3},3 };
+
+	m_RegistryPtr->AddComponent<AnimatedSprite>(enemy, enemyAnimations);
+
+	m_RegistryPtr->AddComponent<ScriptComponent>(enemy, ScriptComponent());
+	m_RegistryPtr->GetComponent<ScriptComponent>(enemy)->attachScript<MeleeEnemyScript>(MeleeEnemyScript(enemy, m_RegistryPtr, m_PlayerEntity));
+
+	return enemy;
+}
+
+void LevelManager::SpawnDoor(int x, int y,Vec2 size)
+{
+	std::string direction;
+
+	//Find which direction this door is
+	if (x == 0) { direction = "Left"; }
+	else if (x == size.x - 1) { direction = "Right"; }
+	else if (y == 0) { direction = "Up"; }
+	else if (y == size.y - 1) { direction = "Down"; }
+
+	if (CheckForRoom(Vec2Add(directionVectors[direction], m_CurrentPos)))
+	{
+		Entity newDoor = m_RegistryPtr->CreateEntity();
+		m_RegistryPtr->AddComponent<Transform2D>(newDoor, Transform2D{ {(float)x * 32,(float)y * 32},{1,1} });
+
+		std::cout << "Adding door entity " << newDoor << std::endl;
+
+		m_RegistryPtr->AddComponent<Sprite>(newDoor, { {0,1},"LevelSprites" });
+
+		//DOOR SCRIPTCOMPONENTS MESSING WITH PLAYER SCRIPTCOMPONENTS
+
+		DoorScript doorScript = DoorScript(newDoor, m_RegistryPtr, m_PlayerEntity, direction);
+		ScriptComponent doorComp = ScriptComponent();
+		doorComp.attachScript<DoorScript>(doorScript);
+
+		m_RegistryPtr->AddComponent<ScriptComponent>(newDoor, doorComp);
+
+		m_CurrentRoomEntities.insert(newDoor);
+		m_CurrentRoomDoorEntities.insert(newDoor);
+	}
+	else
+	{
+		Build(2, x, y, size);
 	}
 }

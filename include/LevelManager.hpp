@@ -63,12 +63,13 @@ using Entity = uint32_t;
 class LevelManager
 {
 public:
-	LevelManager::LevelManager(Registry* registrPtr);
+	LevelManager::LevelManager();
 
 	void LevelManager::GenerateLevel(int steps);
 	Vec2 LevelManager::GetCurrentPos();
 	void LevelManager::Move(std::string dir);
 	void SetPlayer(Entity player);
+	void SetReigstryPtr(Registry* registryPtr);
 
 	bool LevelManager::CheckForRoom(Vec2 pos);
 	int LevelManager::GetRoomID(Vec2 pos);
@@ -76,11 +77,6 @@ public:
 	void LoadCurrentRoom();
 
 	std::set<Entity> GetDoorEntities();
-
-	//Bad implementation, FIX///////////////////////////////////
-	float loadedFirstRoom = false;
-	std::string doorInteracted = "None";
-	///////////////////////////////////////////////////////////
 
 private:
 	Registry* m_RegistryPtr;
@@ -104,5 +100,7 @@ private:
 	};
 
 	void LevelManager::Build(int id, int x, int y,Vec2 size);
+	Entity LevelManager::SpawnEnemy(int x,int y);
+	void LevelManager::SpawnDoor(int x,int y,Vec2 size);
 };
 

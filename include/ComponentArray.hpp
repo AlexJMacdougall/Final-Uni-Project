@@ -19,7 +19,7 @@ class ComponentArray : public IComponentArray
 public:
 	ComponentArray()
 	{
-		mSize = 0;
+		mSize = 1;
 	}
 
 	void AddComponent(Entity entity,T component)
@@ -36,10 +36,22 @@ public:
 		mSparseArray[entity] = newIndex;
 
 		mSize += 1;
+
+		if ((std::string)typeid(T).name() == (std::string)("class ScriptComponent"))
+		{
+			std::cout << "Addcomponent for entity " << entity <<" at position " << mSparseArray[entity] << " {" << std::endl;
+			for (int i = 0; i < mSize; i++)
+			{
+				std::cout <<i<<") " << typeid(mComponentArray[i]).name() << std::endl;
+			}
+			std::cout << "}" << std::endl;
+		}
 	}
 
 	void RemoveComponent(Entity entity) override
 	{
+		//Cannot remove a component if the size is zero
+		assert(mSize > 1);
 		//Move last item to deleted item's spot
 		uint32_t indexOfRemovedComponent = mSparseArray[entity];
 		uint32_t indexOfLastComponent = mSize - 1;
@@ -51,6 +63,21 @@ public:
 		mSparseArray[entityOfLastComponent] = indexOfRemovedComponent;
 
 		mSize -= 1;
+
+		//Set sparseArray of removed entity to 0 to avoid finding
+		mSparseArray[entity] = 0;
+
+		if ((std::string)typeid(T).name() == (std::string)("class ScriptComponent"))
+		{
+			std::cout << "RemoveComponent for entity " << entity << std::endl;
+			std::cout << "Entity " << entityOfLastComponent << "'s component moved from pos " << indexOfLastComponent << " to " << indexOfRemovedComponent << std::endl;
+			std::cout << "SparseArray location " << entityOfLastComponent << " is now " << mSparseArray[entityOfLastComponent] << "{" << std::endl;
+			for (int i = 0; i < mSize; i++)
+			{
+				std::cout << typeid(mComponentArray[i]).name() << std::endl;
+			}
+			std::cout << "}" << std::endl;
+		}
 	}
 
 	T* GetComponent(Entity entity) 
