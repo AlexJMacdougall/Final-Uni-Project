@@ -5,6 +5,8 @@
 #include "Registry.hpp"
 #include "Components/StructComponents.hpp"
 
+#include <iostream>
+
 //Script class that provides a template to be overwritten by other scripts
 class Script
 {
@@ -13,6 +15,13 @@ public:
 	m_AttachedEntity(entity),
 	m_RegistryPtr(registryPtr)
 	{};
+
+	Script::~Script()
+	{
+		std::cout << "Deleting script object for entity "<< m_AttachedEntity << std::endl;
+		for (Entity entity : m_InternalEntities) { m_RegistryPtr->DestroyEntity(entity); }
+	}
+
 	virtual void update(float dt) = 0;
 protected:
 	Entity m_AttachedEntity;
@@ -33,6 +42,9 @@ protected:
 		float dist = sqrt((xDist * xDist) + (yDist * yDist));
 		return abs(dist);
 	}
+
+	//Set of all entities made by this script so they can be destroyed when the script is deleted
+	std::set<Entity> m_InternalEntities;
 };
 
 //Component that can be added to entities to allow scripts to be attached
@@ -48,14 +60,20 @@ public:
 	{
 		T* scriptPtr = new T(std::forward<Args>(args)...); //Create a pointer to a new script and pass in the variadic arguments
 		m_Script = scriptPtr; //Set script to T
-		std::cout << "Attached script to component of type " << typeid(T).name() << " pointer is: " << m_Script << std::endl;
 	}
 
 	template<typename T>
 	T* GetScript()
 	{
-		std::cout << "Returning pointer to class of typename " << typeid(T).name() << " pointer is: " << m_Script << std::endl;
 		return reinterpret_cast<T*>(m_Script);
+	}
+
+	void deleteScript()
+	{
+		std::cout << "Deleting script"<< std::endl;
+		assert(m_Script != nullptr);
+		delete m_Script;
+		m_Script = nullptr;
 	}
 
 private:

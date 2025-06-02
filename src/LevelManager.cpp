@@ -105,11 +105,9 @@ int LevelManager::GetRoomID(Vec2 pos)
 
 void LevelManager::LoadCurrentRoom()
 {
-	std::cout << "Load-Current-Room-----------------------" << std::endl;
 	//Clear old room entities
 	for (Entity entity : m_CurrentRoomEntities) 
 	{ 
-		std::cout << ") Destroying entity " << entity <<", type: "<< typeid(entity).name() << std::endl;
 		m_RegistryPtr->DestroyEntity(entity); 
 	}
 	m_CurrentRoomEntities = {};
@@ -217,15 +215,13 @@ void LevelManager::SpawnDoor(int x, int y,Vec2 size)
 		Entity newDoor = m_RegistryPtr->CreateEntity();
 		m_RegistryPtr->AddComponent<Transform2D>(newDoor, Transform2D{ {(float)x * 32,(float)y * 32},{1,1} });
 
-		std::cout << "Adding door entity " << newDoor << std::endl;
-
 		m_RegistryPtr->AddComponent<Sprite>(newDoor, { {0,1},"LevelSprites" });
 
 		//DOOR SCRIPTCOMPONENTS MESSING WITH PLAYER SCRIPTCOMPONENTS
 
-		DoorScript doorScript = DoorScript(newDoor, m_RegistryPtr, m_PlayerEntity, direction);
+		DoorScript *doorScript = new DoorScript(newDoor, m_RegistryPtr, m_PlayerEntity, direction);
 		ScriptComponent doorComp = ScriptComponent();
-		doorComp.attachScript<DoorScript>(doorScript);
+		doorComp.attachScript<DoorScript>(*doorScript);
 
 		m_RegistryPtr->AddComponent<ScriptComponent>(newDoor, doorComp);
 
@@ -236,4 +232,5 @@ void LevelManager::SpawnDoor(int x, int y,Vec2 size)
 	{
 		Build(2, x, y, size);
 	}
+	std::cout << "Leaving scope for door" << std::endl;
 }

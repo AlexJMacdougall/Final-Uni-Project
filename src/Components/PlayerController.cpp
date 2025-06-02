@@ -13,6 +13,16 @@ PlayerController::PlayerController(Entity player, Camera2D* cameraPtr, Registry*
 	m_speed = 100;
 	m_health = 100;
 	m_slowdown = 1.0f;
+
+	//Entity that holds the sprite for the spellcasting overlay
+	m_SpellcastingOverlay = m_RegistryPtr->CreateEntity();
+
+	Vec2 playerPos = m_RegistryPtr->GetComponent<Transform2D>(m_Player)->position;
+	m_RegistryPtr->AddComponent<Transform2D>(m_SpellcastingOverlay, Transform2D{ playerPos ,Vec2{2,2} });
+	m_RegistryPtr->AddComponent<Sprite>(m_SpellcastingOverlay, { Vec2{2,2},"Player",2,true });
+
+	//Put entity into InternalEntities so that Script destructor can destroy it
+	m_InternalEntities.insert(m_SpellcastingOverlay);
 }
 
 void PlayerController::update(float dt)
@@ -35,22 +45,35 @@ void PlayerController::update(float dt)
 	
 	if (IsKeyPressed(KEY_Q))
 	{
-		m_slowdown = 0.4;
-	}
-	else if (IsKeyReleased(KEY_Q))
-	{
-		m_slowdown = 1.0;
+		if(m_slowdown == 1.0f)
+		{
+			m_slowdown = 0.5f;
+			
+			m_RegistryPtr->GetComponent<Sprite>(m_SpellcastingOverlay)->hide = false;
+			for (Entity entity : m_KnownSpellWords) { m_RegistryPtr->GetComponent<ScriptComponent>(entity)->GetScript<SpellWordScript>()->SetActive(true); }
+		}
+		else
+		{
+			m_slowdown = 1.0f;
+			m_RegistryPtr->GetComponent<Sprite>(m_SpellcastingOverlay)->hide = true;
+			for (Entity entity : m_KnownSpellWords) { m_RegistryPtr->GetComponent<ScriptComponent>(entity)->GetScript<SpellWordScript>()->SetActive(false); }
+		}
 	}
 	
+	for (Entity entity : m_KnownSpellWords) { std::cout << entity << std::endl; }
+
 	//Move entity then check for collision
 	
 	transform->position.x += directionX * m_speed * dt * m_slowdown;
 	if (!(CheckCollision().empty())) { transform->position.x -= directionX * m_speed * dt; }
 	transform->position.y += directionY * m_speed * dt * m_slowdown;
 	if (!(CheckCollision().empty())) { transform->position.y -= directionY * m_speed * dt; }
-	
+
 	//Update camera pos
 	m_cameraPtr->target = Vector2{ transform->position.x , transform->position.y };
+
+	//Update following entities
+	m_RegistryPtr->GetComponent<Transform2D>(m_SpellcastingOverlay)->position = m_RegistryPtr->GetComponent<Transform2D>(m_Player)->position;
 }
 
 void PlayerController::Damage(float damage)
@@ -61,7 +84,6 @@ void PlayerController::Damage(float damage)
 
 bool PlayerController::CheckIfDead()
 {
-	std::cout << "In playerController for player " << m_AttachedEntity << " Health is " << m_health<<std::endl;
 	return (m_health <= 0);
 }
 
@@ -73,6 +95,11 @@ float PlayerController::GetHealth()
 float PlayerController::GetSpeed()
 {
 	return m_speed;
+}
+
+void PlayerController::AddSpellWord(Entity newWord)
+{
+	m_KnownSpellWords.insert(newWord);
 }
 
 std::set<Entity> PlayerController::CheckCollision()

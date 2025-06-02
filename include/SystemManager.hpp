@@ -9,6 +9,7 @@
 #include "LevelManager.hpp"
 #include "Registry.hpp"
 #include "Components/ScriptComponent.hpp"
+#include "Components/SpellWordScript.hpp"
 #include "Components/DoorScript.hpp"
 
 using Entity = std::uint32_t;
@@ -70,6 +71,8 @@ private:
 	std::vector<SpriteSheet> m_SpriteSheets;
 
 	void ResetGame();
+	void CreateSpellWord(Vec2 UV);
+	std::set<Entity> m_SpellWords = {};
 };
 
 template<typename t>

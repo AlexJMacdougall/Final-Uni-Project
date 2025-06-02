@@ -36,6 +36,7 @@ private:
 	bool DoingAttackRecovery = false;
 	bool DoingAttack = false;
 	bool Recalc = false;
+	bool StopIdle = false;
 	bool hitPlayer = false;
 
 	enum State 
@@ -44,7 +45,8 @@ private:
 		Attack,
 		AttackWindup,
 		AttackRecovery,
-		Dead
+		Dead,
+		Idle
 	};
 
 	enum State m_CurrentState;
@@ -53,6 +55,7 @@ private:
 	std::map<std::string, float> m_Timers =
 	{
 		{"Stun",0.0f},
+		{"Idle",0.0f},
 	};
 
 	std::array<Vec2,4> directionVectors =

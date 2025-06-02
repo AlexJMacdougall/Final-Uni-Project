@@ -8,14 +8,15 @@ MeleeEnemyScript::MeleeEnemyScript(Entity entity,Registry* registryPtr,Entity pl
 	m_PlayerEntity(player)
 {
 	m_Health = 10.0f;
-	m_Damage = 100.0f;
+	m_Damage = 10.0f;
 	m_Speed = 90.0f;
 	m_MeleeRange = 50.0f;
 
 	m_Navmesh = m_RegistryPtr->GetEntitiesWithComponent<Navmesh>();
 	Get_Path(m_PlayerEntity);
 
-	m_CurrentState = Chase;
+	m_CurrentState = Idle;
+	m_Timers["Idle"] = 0.4f;
 }
 
 void MeleeEnemyScript::update(float dt)
@@ -28,6 +29,7 @@ void MeleeEnemyScript::update(float dt)
 	DoingAttackWindup = (!(sprite->finishedAnimation) && sprite->currentAnimation == "Windup");
 	DoingAttack = (!(sprite->finishedAnimation) && sprite->currentAnimation == "Attack");
 	DoingAttackRecovery = (!(sprite->finishedAnimation) && sprite->currentAnimation == "Recovery");
+	StopIdle = (m_Timers["Idle"] <= 0);
 	//
 
 	//Check if enemy is dead - outside of switch because it is the same regardless of state
@@ -38,6 +40,20 @@ void MeleeEnemyScript::update(float dt)
 	case Dead:
 		std::cout << "Enemy " << m_AttachedEntity << " is dead" << std::endl;
 		m_RegistryPtr->DestroyEntity(m_AttachedEntity);
+		break;
+
+	case Idle:
+		if(StopIdle)
+		{
+			sprite->currentAnimation = "Chase";
+			Get_Path(m_PlayerEntity);
+			m_CurrentState = Chase;
+		}
+		else
+		{
+			sprite->currentAnimation = "Idle";
+			m_Timers["Idle"] -= dt;
+		}
 		break;
 
 	case Chase:

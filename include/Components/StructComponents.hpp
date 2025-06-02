@@ -34,6 +34,7 @@ struct Sprite
 	Vec2 UV;
 	std::string SpriteSheetID;
 	int Layer = 0; //Default layer
+	bool hide = false;
 };
 
 struct SpriteSheet {
@@ -62,4 +63,8 @@ struct AnimatedSprite {
 
 struct Navmesh {
 	Vec2 pos;
+};
+
+struct Spell_Word_Data {
+	std::string name;
 };

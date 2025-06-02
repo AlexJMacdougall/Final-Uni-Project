@@ -37,6 +37,7 @@ public:
 
 		mSize += 1;
 
+		/*//DEBUG
 		if ((std::string)typeid(T).name() == (std::string)("class ScriptComponent"))
 		{
 			std::cout << "Addcomponent for entity " << entity <<" at position " << mSparseArray[entity] << " {" << std::endl;
@@ -46,10 +47,17 @@ public:
 			}
 			std::cout << "}" << std::endl;
 		}
+		*/
 	}
 
 	void RemoveComponent(Entity entity) override
 	{
+		if ((std::string)typeid(T).name() == (std::string)("class ScriptComponent"))
+		{
+			auto comp = GetComponent(entity);
+			reinterpret_cast<ScriptComponent*>(comp)->deleteScript();
+		}
+
 		//Cannot remove a component if the size is zero
 		assert(mSize > 1);
 		//Move last item to deleted item's spot
@@ -67,6 +75,7 @@ public:
 		//Set sparseArray of removed entity to 0 to avoid finding
 		mSparseArray[entity] = 0;
 
+		/*//DEBUG
 		if ((std::string)typeid(T).name() == (std::string)("class ScriptComponent"))
 		{
 			std::cout << "RemoveComponent for entity " << entity << std::endl;
@@ -77,7 +86,7 @@ public:
 				std::cout << typeid(mComponentArray[i]).name() << std::endl;
 			}
 			std::cout << "}" << std::endl;
-		}
+		}*/
 	}
 
 	T* GetComponent(Entity entity) 

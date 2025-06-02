@@ -21,13 +21,21 @@ SystemManager::SystemManager(Registry* registryPtr, int screenWidth,int screenHe
 	camera.rotation = 0.0f;
 	camera.zoom = 1.0f;
 
-
 	m_SpriteSheets = 
 	{ 
 		{"LevelSprites",LoadTexture("LevelSprites.png"),{5,2},SPRITE_SIZE},
-		{"Player",LoadTexture("PlayerSprites.png"),{5,2},SPRITE_SIZE},
-		{"Enemy",LoadTexture("EnemySprites.png"),{5,4},SPRITE_SIZE}
+		{"Player",LoadTexture("PlayerSprites.png"),{4,3},SPRITE_SIZE},
+		{"Enemy",LoadTexture("EnemySprites.png"),{5,4},SPRITE_SIZE},
+		{"SpellWordIcons",LoadTexture("SpellWordIcons.png"),{6,1},SPRITE_SIZE},
 	};
+
+	CreateSpellWord({0.0f,0.0f});
+	CreateSpellWord({0.0f,0.0f});
+	CreateSpellWord({0.0f,0.0f});
+	CreateSpellWord({0.0f,0.0f});
+	CreateSpellWord({0.0f,0.0f});
+	CreateSpellWord({0.0f,0.0f});
+
 
 	ResetGame();
 
@@ -42,18 +50,12 @@ SystemManager::~SystemManager()
 void SystemManager::Update(float dt)
 {
 	//Check if the player is dead
-	std::cout << "Update------------------------------------------" << std::endl;
-	std::cout << "In update, player is "<<m_PlayerEntity<<"; ";
 	if (m_RegistryPtr->GetComponent<ScriptComponent>(m_PlayerEntity)->GetScript<PlayerController>()->CheckIfDead())
 	{
-		std::cout << "Calling-Reset-Game------------------------------" << std::endl;
 		ResetGame();
 	}
 	else
 	{
-		//std::cout << "Debug: Damaging entity " << m_PlayerEntity << " by 100" << std::endl;
-		//m_RegistryPtr->GetComponent<ScriptComponent>(m_PlayerEntity)->GetScript<PlayerController>()->Damage(100);
-
 		//Animate Sprites
 		this->Animate(dt * m_Slowdown);
 
@@ -118,6 +120,8 @@ void SystemManager::Draw()
 	std::set<Entity> entities = m_RegistryPtr->GetEntitiesWithComponent<Sprite>();
 
 	Rectangle textureRect = { 0,0,SPRITE_SIZE,SPRITE_SIZE };
+	Rectangle positionRect;
+	Vector2 origin;
 
 	for (int currentLayer = 0; currentLayer < NUM_OF_LAYERS; currentLayer++)
 	{
@@ -125,25 +129,43 @@ void SystemManager::Draw()
 		{
 			//Get entity sprite
 			auto sprite = m_RegistryPtr->GetComponent<Sprite>(entity);
-			//Check the sprites layer
-			if(sprite->Layer == currentLayer)
-			{
-				//If the sprite is on the layer currently being drawn, fetch other data needed and draw it
-				auto transform = m_RegistryPtr->GetComponent<Transform2D>(entity);
+			//Skip drawing sprite if hidden 
+			if (!sprite->hide)
+			{ 
+				//Check the sprites layer
+				if (sprite->Layer == currentLayer)
+				{
+					//If the sprite is on the layer currently being drawn, fetch other data needed and draw it
+					auto transform = m_RegistryPtr->GetComponent<Transform2D>(entity);
 
-				Vector2 position = { transform->position.x,transform->position.y };
-				SpriteSheet* spriteSheet = GetSpriteSheet(sprite->SpriteSheetID);
-				Texture textures = spriteSheet->textures;
+					//If scale is equal to or less than zero it will not draw.
+					assert(transform->scale.x > 0 && transform->scale.y > 0);
 
-				//Set textureRect
-				textureRect.x = sprite->UV.x * spriteSheet->spriteSize;
-				textureRect.y = sprite->UV.y * spriteSheet->spriteSize;
+					//Set position
+					positionRect.x = transform->position.x;
+					positionRect.y = transform->position.y;
 
-				//Draw Texture
-				DrawTextureRec(textures, textureRect, position, WHITE);
+					//Scale texture
+					positionRect.width = SPRITE_SIZE * transform->scale.x;
+					positionRect.height = SPRITE_SIZE * transform->scale.y;
+
+					//Set origin
+					origin = { positionRect.width / 2, positionRect.height / 2 };
+
+					SpriteSheet* spriteSheet = GetSpriteSheet(sprite->SpriteSheetID);
+					Texture textures = spriteSheet->textures;
+
+					//Set textureRect
+					textureRect.x = sprite->UV.x * spriteSheet->spriteSize;
+					textureRect.y = sprite->UV.y * spriteSheet->spriteSize;
+
+					//Draw Texture
+					DrawTexturePro(textures, textureRect, positionRect,origin, 0.0f, WHITE);
+				}
 			}
 		}
 	}
+
 	EndMode2D();
 	EndDrawing();
 }
@@ -271,7 +293,6 @@ Camera2D* SystemManager::GetCamera()
 
 void SystemManager::ResetGame()
 {
-	std::cout << "ResetGame------------------------------------------" << std::endl;
 	if (m_PlayerEntity != -1) 
 	{ 
 		m_RegistryPtr->DestroyEntity(m_PlayerEntity); 
@@ -279,7 +300,6 @@ void SystemManager::ResetGame()
 
 	m_PlayerEntity = m_RegistryPtr->CreateEntity();
 
-	std::cout << "Player is " << m_PlayerEntity << std::endl;
 
 	//for (Entity entity : m_RegistryPtr->GetEntitiesWithComponent<Transform2D>()) { m_RegistryPtr->DestroyEntity(entity); }
 
@@ -290,18 +310,37 @@ void SystemManager::ResetGame()
 	m_RegistryPtr->AddComponent<Sprite>(m_PlayerEntity, playerSprite);
 	AnimatedSprite playerAnimations = AnimatedSprite{ &playerSprite,0.2f };
 	playerAnimations.animationData["Idle"] = Animation{ Vec2{0,0},5 };
-	playerAnimations.animationData["Walk"] = Animation{ Vec2{0,1},5 };
+	playerAnimations.animationData["Walk"] = Animation{ Vec2{1,1},5 };
 	playerAnimations.currentAnimation = "Idle";
 	m_RegistryPtr->AddComponent<AnimatedSprite>(m_PlayerEntity, playerAnimations);
 
-	PlayerController playerController = PlayerController(m_PlayerEntity, GetCamera(), m_RegistryPtr);
+	PlayerController *playerController = new PlayerController(m_PlayerEntity, GetCamera(), m_RegistryPtr);
+
+	//Give the player all words to start with - only for demo
+	for (Entity word : m_SpellWords) {playerController->AddSpellWord(word);}
 
 	ScriptComponent playerScript = ScriptComponent();
-	playerScript.attachScript<PlayerController>(playerController);
+	playerScript.attachScript<PlayerController>(*playerController);
+	std::cout << "Created playerScript and Controller" << std::endl;
 	m_RegistryPtr->AddComponent<ScriptComponent>(m_PlayerEntity, playerScript);
 
 	m_LevelManager.SetPlayer(m_PlayerEntity);
 	m_LevelManager.GenerateLevel(10);
 	m_LevelManager.LoadCurrentRoom();
-	std::cout << "End-of-ResetGame-----------------------------" << std::endl;
+	std::cout << "Leaving scope for player" << std::endl;
+}
+
+void SystemManager::CreateSpellWord(Vec2 UV)
+{
+	Entity spellWord = m_RegistryPtr->CreateEntity();
+	m_RegistryPtr->AddComponent<Transform2D>(spellWord, { {100.0f,100.0f},Vec2{0.5,0.5}});
+	m_RegistryPtr->AddComponent<Sprite>(spellWord, Sprite{ UV,"SpellWordIcons",2,true });
+
+	SpellWordScript *spellWordScript = new SpellWordScript(spellWord,m_RegistryPtr,m_PlayerEntity);
+	ScriptComponent spellScriptComp = ScriptComponent();
+	spellScriptComp.attachScript<SpellWordScript>(*spellWordScript);
+
+	m_RegistryPtr->AddComponent<ScriptComponent>(spellWord, spellScriptComp);
+
+	m_SpellWords.insert(spellWord);
 }
