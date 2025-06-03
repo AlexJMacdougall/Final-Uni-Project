@@ -29,15 +29,22 @@ SystemManager::SystemManager(Registry* registryPtr, int screenWidth,int screenHe
 		{"SpellWordIcons",LoadTexture("SpellWordIcons.png"),{6,1},SPRITE_SIZE},
 	};
 
-	CreateSpellWord({0.0f,0.0f});
-	CreateSpellWord({0.0f,0.0f});
-	CreateSpellWord({0.0f,0.0f});
-	CreateSpellWord({0.0f,0.0f});
-	CreateSpellWord({0.0f,0.0f});
-	CreateSpellWord({0.0f,0.0f});
-
-
 	ResetGame();
+
+	std::array<SpellWordData, 6> spellTypes = 
+	{
+		SpellWordData{"First",3},
+		SpellWordData{"Second",3},
+		SpellWordData{"Third",3},
+		SpellWordData{"Fourth",3},
+		SpellWordData{"Fifth",3},
+		SpellWordData{"Sixth",3}
+	};
+
+	//Create spell words - limited and hardcoded for demo
+	for (int x = 0; x < 6; x++) { CreateSpellWord({ (float)x,0.0f },spellTypes[x]); }
+	//Give the player all words to start with - only for demo
+	for (Entity word : m_SpellWords) { m_RegistryPtr->GetComponent<ScriptComponent>(m_PlayerEntity)->GetScript<PlayerController>()->AddLearnedSpellWord(word); }
 
 	SetTargetFPS(60);
 }
@@ -316,9 +323,6 @@ void SystemManager::ResetGame()
 
 	PlayerController *playerController = new PlayerController(m_PlayerEntity, GetCamera(), m_RegistryPtr);
 
-	//Give the player all words to start with - only for demo
-	for (Entity word : m_SpellWords) {playerController->AddSpellWord(word);}
-
 	ScriptComponent playerScript = ScriptComponent();
 	playerScript.attachScript<PlayerController>(*playerController);
 	std::cout << "Created playerScript and Controller" << std::endl;
@@ -330,13 +334,14 @@ void SystemManager::ResetGame()
 	std::cout << "Leaving scope for player" << std::endl;
 }
 
-void SystemManager::CreateSpellWord(Vec2 UV)
+void SystemManager::CreateSpellWord(Vec2 UV,SpellWordData data)
 {
 	Entity spellWord = m_RegistryPtr->CreateEntity();
 	m_RegistryPtr->AddComponent<Transform2D>(spellWord, { {100.0f,100.0f},Vec2{0.5,0.5}});
-	m_RegistryPtr->AddComponent<Sprite>(spellWord, Sprite{ UV,"SpellWordIcons",2,true });
+	m_RegistryPtr->AddComponent<SphereCollider>(spellWord, { 8.0f,1 });
+	m_RegistryPtr->AddComponent<Sprite>(spellWord, Sprite{ UV,"SpellWordIcons",3,true });
 
-	SpellWordScript *spellWordScript = new SpellWordScript(spellWord,m_RegistryPtr,m_PlayerEntity);
+	SpellWordScript *spellWordScript = new SpellWordScript(spellWord,m_RegistryPtr,m_PlayerEntity,&camera,data);
 	ScriptComponent spellScriptComp = ScriptComponent();
 	spellScriptComp.attachScript<SpellWordScript>(*spellWordScript);
 

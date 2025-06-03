@@ -28,12 +28,8 @@ protected:
 	
 	Registry* m_RegistryPtr;
 
-	float GetDistance(Entity entity1, Entity entity2)
+	float GetDistance(Vec2 pos1, Vec2 pos2)
 	{
-		//Get translations of both entities
-		auto pos1 = m_RegistryPtr->GetComponent<Transform2D>(entity1)->position;
-		auto pos2 = m_RegistryPtr->GetComponent<Transform2D>(entity2)->position;
-
 		//Calculate x and y distance
 		float xDist = pos1.x - pos2.x;
 		float yDist = pos1.y - pos2.y;

@@ -3,7 +3,7 @@
 #include <cstdint>
 #include <string>
 
-#include "ScriptComponent.hpp"
+#include "Components/ScriptComponent.hpp"
 #include "Components/StructComponents.hpp"
 #include "Registry.hpp"
 

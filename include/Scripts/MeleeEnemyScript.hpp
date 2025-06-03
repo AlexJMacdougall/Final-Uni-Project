@@ -5,7 +5,7 @@
 
 #include "Components/ScriptComponent.hpp"
 #include "Components/StructComponents.hpp"
-#include "Components/PlayerController.hpp"
+#include "Scripts/PlayerController.hpp"
 #include "Registry.hpp"
 
 using Entity = std::uint32_t;
@@ -23,7 +23,6 @@ private:
 
 	//Enemy Attributes
 	float m_Health;
-	float m_Damage;
 	float m_Speed;
 	float m_MeleeRange;
 	float m_AttackWindupTime;

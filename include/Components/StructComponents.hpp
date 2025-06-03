@@ -16,12 +16,14 @@ struct Transform2D
 struct SphereCollider
 {
 	float radius;
+	int layer = 0;
 };
 
 struct BoxCollider
 {
 	float width;
 	float height;
+	int layer = 0;
 };
 
 struct RoomTemplate {
@@ -65,6 +67,8 @@ struct Navmesh {
 	Vec2 pos;
 };
 
-struct Spell_Word_Data {
-	std::string name;
+struct SpellWordData
+{
+	std::string type;
+	int power;
 };

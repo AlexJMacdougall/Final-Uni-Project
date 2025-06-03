@@ -18,8 +18,8 @@ by Jeffery Myers is marked with CC0 1.0. To view a copy of this license, visit h
 #include "LevelManager.hpp"
 #include "SystemManager.hpp"
 #include "Components/ScriptComponent.hpp"
-#include "Components/PlayerController.hpp"
-#include "Components/MeleeEnemyScript.hpp"
+#include "Scripts/PlayerController.hpp"
+#include "Scripts/MeleeEnemyScript.hpp"
 #include "Components/Vec2.hpp"
 
 int main()
@@ -42,7 +42,6 @@ int main()
 	REGISTRY.RegisterComponent<SphereCollider>();
 	REGISTRY.RegisterComponent<BoxCollider>();
 	REGISTRY.RegisterComponent<ScriptComponent>();
-	REGISTRY.RegisterComponent<Spell_Word_Data>();
 
 	SystemManager SYSTEM(&REGISTRY, 1280, 720);
 

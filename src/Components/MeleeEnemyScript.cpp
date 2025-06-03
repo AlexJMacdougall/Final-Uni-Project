@@ -1,5 +1,5 @@
 
-#include "Components/MeleeEnemyScript.hpp"
+#include "Scripts/MeleeEnemyScript.hpp"
 
 #include <iostream>
 
@@ -8,7 +8,6 @@ MeleeEnemyScript::MeleeEnemyScript(Entity entity,Registry* registryPtr,Entity pl
 	m_PlayerEntity(player)
 {
 	m_Health = 10.0f;
-	m_Damage = 10.0f;
 	m_Speed = 90.0f;
 	m_MeleeRange = 50.0f;
 
@@ -21,11 +20,13 @@ MeleeEnemyScript::MeleeEnemyScript(Entity entity,Registry* registryPtr,Entity pl
 
 void MeleeEnemyScript::update(float dt)
 {
-	//Get entity sprite
+	//Get entity data
 	auto sprite = m_RegistryPtr->GetComponent<AnimatedSprite>(m_AttachedEntity);
+	auto pos1 = m_RegistryPtr->GetComponent<Transform2D>(m_AttachedEntity)->position;
+	auto pos2 = m_RegistryPtr->GetComponent<Transform2D>(m_PlayerEntity)->position;
 
 	//Update rules
-	InMeleeRange = (GetDistance(m_AttachedEntity, m_PlayerEntity) < m_MeleeRange);
+	InMeleeRange = (GetDistance(pos1, pos2) < m_MeleeRange);
 	DoingAttackWindup = (!(sprite->finishedAnimation) && sprite->currentAnimation == "Windup");
 	DoingAttack = (!(sprite->finishedAnimation) && sprite->currentAnimation == "Attack");
 	DoingAttackRecovery = (!(sprite->finishedAnimation) && sprite->currentAnimation == "Recovery");
@@ -70,7 +71,11 @@ void MeleeEnemyScript::update(float dt)
 			{
 				moveTarget = m_MovePath.front(); 
 				Move_Towards(m_RegistryPtr->GetComponent<Transform2D>(moveTarget)->position, dt);
-				if (GetDistance(moveTarget, m_AttachedEntity) <= 1)
+
+				auto pos1 = m_RegistryPtr->GetComponent<Transform2D>(moveTarget)->position;
+				auto pos2 = m_RegistryPtr->GetComponent<Transform2D>(m_AttachedEntity)->position;
+
+				if (GetDistance(pos1, pos2) <= 1)
 				{
 					m_MovePath.pop_front(); 
 				}
@@ -113,6 +118,7 @@ void MeleeEnemyScript::update(float dt)
 			m_CurrentState = Chase;
 			sprite->currentAnimation = "Move";
 			hitPlayer = false;
+			Get_Path(m_PlayerEntity);
 		}
 		break;
 
@@ -124,9 +130,13 @@ void MeleeEnemyScript::update(float dt)
 		}
 		else
 		{
-			if(GetDistance(m_PlayerEntity,m_AttachedEntity) < m_MeleeRange && !hitPlayer)
+
+			auto pos1 = m_RegistryPtr->GetComponent<Transform2D>(m_PlayerEntity)->position;
+			auto pos2 = m_RegistryPtr->GetComponent<Transform2D>(m_AttachedEntity)->position;
+
+			if(GetDistance(pos1, pos2) < m_MeleeRange && !hitPlayer)
 			{
-				m_RegistryPtr->GetComponent<ScriptComponent>(m_PlayerEntity)->GetScript<PlayerController>()->Damage(m_Damage);
+				m_RegistryPtr->GetComponent<ScriptComponent>(m_PlayerEntity)->GetScript<PlayerController>()->Damage();
 				hitPlayer = true;
 			}
 		}
@@ -218,11 +228,16 @@ std::list<Entity> MeleeEnemyScript::Search(Entity targetEntity, Entity currentNa
 
 		for(Entity entity : possibleDirections)
 		{
-			float newDistance = GetDistance(entity, m_PlayerEntity);
+
+			auto entityPos = m_RegistryPtr->GetComponent<Transform2D>(entity)->position;
+			auto playerPos = m_RegistryPtr->GetComponent<Transform2D>(m_PlayerEntity)->position;
+
+			float newDistance = GetDistance(entityPos, playerPos);
 			//Check that the entity hasn't been checked and that it is also closer to the target
 			if(newDistance < lowestDistance && (searchedPositions.find(entity) == searchedPositions.end()))
 			{
-				if ((GetDistance(closestEntity, m_PlayerEntity)) < m_MeleeRange - 1) { return path; }
+				auto closedEntityPos = m_RegistryPtr->GetComponent<Transform2D>(closestEntity)->position;
+				if ((GetDistance(closedEntityPos, playerPos)) < m_MeleeRange - 1) { return path; }
 				lowestDistance = newDistance;
 				closestEntity = entity;
 				searchedPositions.insert(closestEntity);

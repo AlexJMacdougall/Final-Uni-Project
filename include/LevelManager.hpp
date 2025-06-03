@@ -9,8 +9,8 @@
 
 #include "Components/StructComponents.hpp"
 #include "Components/ScriptComponent.hpp"
-#include "Components/MeleeEnemyScript.hpp"
-#include "Components/DoorScript.hpp"
+#include "Scripts/MeleeEnemyScript.hpp"
+#include "Scripts/DoorScript.hpp"
 #include "Components/Vec2.hpp"
 #include "Registry.hpp"
 

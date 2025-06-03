@@ -1,7 +1,7 @@
 #pragma once
 
 #include "Components/ScriptComponent.hpp"
-#include "Components/SpellWordScript.hpp"
+#include "Scripts/SpellWordScript.hpp"
 #include "Registry.hpp"
 
 //using Entity = uint32_t;
@@ -13,12 +13,16 @@ public:
 
 	void update(float dt) override;
 
-	void Damage(float damage);
+	void Damage();
 	bool CheckIfDead();
 	float GetHealth();
 	float GetSpeed();
 
-	void AddSpellWord(Entity newSpell);
+	void AddLearnedSpellWord(Entity newWord);
+	void AddSpellWord(Entity newWord);
+	void RemoveSpellWord(Entity word);
+
+	void CastSpell();
 
 	float m_slowdown;
 private:
@@ -26,20 +30,17 @@ private:
 	Camera2D* m_cameraPtr;
 	Registry* m_RegistryPtr;
 
+	std::set<Entity> m_CurrentSpell;
+
 	std::set<Entity> CheckCollision();
 
 	float m_speed;
-	float m_health;
+	int m_health;
+	float hitTimer = 0.0f;
 
 	//Spellcasting system
 	Entity m_SpellcastingOverlay;
 
 	std::set<Entity> m_KnownSpellWords;
-
-	//Array that holds positions to display spell word icons
-	std::array<Vec2,8> displayPos = 
-	{
-
-	}
 };
 

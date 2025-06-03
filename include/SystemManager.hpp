@@ -9,13 +9,13 @@
 #include "LevelManager.hpp"
 #include "Registry.hpp"
 #include "Components/ScriptComponent.hpp"
-#include "Components/SpellWordScript.hpp"
-#include "Components/DoorScript.hpp"
+#include "Scripts/SpellWordScript.hpp"
+#include "Scripts/DoorScript.hpp"
 
 using Entity = std::uint32_t;
 
 const int NUM_OF_SPRITESHEETS = 2;
-const int NUM_OF_LAYERS = 3;
+const int NUM_OF_LAYERS = 4;
 const int SPRITE_SIZE = 32;
 
 class SystemManager
@@ -71,7 +71,7 @@ private:
 	std::vector<SpriteSheet> m_SpriteSheets;
 
 	void ResetGame();
-	void CreateSpellWord(Vec2 UV);
+	void CreateSpellWord(Vec2 UV,SpellWordData data);
 	std::set<Entity> m_SpellWords = {};
 };
 

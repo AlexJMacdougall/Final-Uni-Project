@@ -1,5 +1,5 @@
 
-#include "Components/DoorScript.hpp"
+#include "Scripts/DoorScript.hpp"
 #include <iostream>
 
 DoorScript::DoorScript(Entity entity, Registry* registryPtr, Entity player, std::string dir) :
@@ -12,7 +12,9 @@ DoorScript::DoorScript(Entity entity, Registry* registryPtr, Entity player, std:
 
 void DoorScript::update(float dt)
 {	
-	if (GetDistance(m_AttachedEntity, m_PlayerEntity) < m_InteractRange && IsKeyPressed(KEY_E)) 
+	auto pos1 = m_RegistryPtr->GetComponent<Transform2D>(m_AttachedEntity)->position;
+	auto pos2 = m_RegistryPtr->GetComponent<Transform2D>(m_PlayerEntity)->position;
+	if (GetDistance(pos1, pos2) < m_InteractRange && IsKeyPressed(KEY_E))
 	{ 
 		m_PlayerInteracted = true;
 	}
