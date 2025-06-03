@@ -91,7 +91,7 @@ void SystemManager::Update(float dt)
 					{
 						Vec2 oppositeDoorPos = m_RegistryPtr->GetComponent<Transform2D>(oppositeDoor)->position;
 						Vec2 offset = Vec2MultiplyFloat(directionVectors[directionOpposites[movedDirection]], 33.0f);
-						//m_RegistryPtr->GetComponent<Transform2D>(m_PlayerEntity)->position = Vec2Minus(oppositeDoorPos, offset);
+						m_RegistryPtr->GetComponent<Transform2D>(m_PlayerEntity)->position = Vec2Minus(oppositeDoorPos, offset);
 						break;
 					}
 				}

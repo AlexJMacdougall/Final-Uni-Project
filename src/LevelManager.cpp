@@ -12,6 +12,7 @@ LevelManager::LevelManager()
 void LevelManager::GenerateLevel(int targetRoomNum)
 {
 	//Clear old room data
+	for (Entity room : m_Rooms) { m_RegistryPtr->DestroyEntity(room); }
 	m_Rooms = {};
 
 	Vec2 currentPos = {0,0};
@@ -20,7 +21,8 @@ void LevelManager::GenerateLevel(int targetRoomNum)
 	srand(time(NULL));
 
 	//Create starting room, always template 0
-	m_Rooms.push_back(RoomTemplate{ 0,currentPos });
+	Entity startRoom = m_RegistryPtr->CreateEntity();
+	m_RegistryPtr->AddComponent<RoomTemplate>(startRoom, { 0,currentPos });
 	int numOfRooms = 1;
 
 	while(numOfRooms<targetRoomNum)
@@ -35,7 +37,9 @@ void LevelManager::GenerateLevel(int targetRoomNum)
 		if(!CheckForRoom(newPos))
 		{
 			int roomID = rand() % NUM_OF_ROOM_TEMPLATES;
-			m_Rooms.push_back(RoomTemplate{roomID,newPos});
+			Entity newRoom = m_RegistryPtr->CreateEntity();
+			m_RegistryPtr->AddComponent<RoomTemplate>(newRoom, { roomID,currentPos });
+			m_Rooms.insert(newRoom);
 			numOfRooms += 1;
 		}
 
@@ -46,9 +50,9 @@ void LevelManager::GenerateLevel(int targetRoomNum)
 	m_CurrentPos = { 0,0 };
 }
 
-Vec2 LevelManager::GetCurrentPos()
+Vec2* LevelManager::GetCurrentPos()
 {
-	return m_CurrentPos;
+	return &m_CurrentPos;
 }
 
 void LevelManager::SetPlayer(Entity player)
@@ -66,7 +70,7 @@ bool LevelManager::CheckForRoom(Vec2 pos)
 	//Checks for a room at a given position
 	for (auto room : m_Rooms)
 	{
-		if (CompareVec2(pos, room.position))
+		if (CompareVec2(pos, m_RegistryPtr->GetComponent<RoomTemplate>(room)->position))
 		{
 			return true;
 		}
@@ -87,7 +91,7 @@ void LevelManager::Move(std::string dir)
 	}
 }
 
-int LevelManager::GetRoomID(Vec2 pos)
+Entity LevelManager::GetRoomAtPos(Vec2 pos)
 {
 	//Check that a room exists at the position passed in
 	//If you failed this assertion you tried to get a room at a position where one does not exist
@@ -95,9 +99,9 @@ int LevelManager::GetRoomID(Vec2 pos)
 
 	for (auto room : m_Rooms)
 	{
-		if (CompareVec2(room.position, pos))
+		if (CompareVec2(m_RegistryPtr->GetComponent<RoomTemplate>(room)->position, pos))
 		{
-			return room.templateID;
+			return room;
 		}
 	}
 }
@@ -112,7 +116,11 @@ void LevelManager::LoadCurrentRoom()
 	m_CurrentRoomEntities = {};
 	m_CurrentRoomDoorEntities = {};
 
-	auto roomTextureMap = ROOM_TEMPLATES[GetRoomID(m_CurrentPos)];
+	auto templateID = m_RegistryPtr->GetComponent<RoomTemplate>(GetRoomAtPos(m_CurrentPos))->templateID;
+
+	std::cout << templateID << std::endl;
+
+	auto roomTextureMap = ROOM_TEMPLATES[templateID];
 
 	for(int x=0; x < roomTextureMap.size();x++)
 	{

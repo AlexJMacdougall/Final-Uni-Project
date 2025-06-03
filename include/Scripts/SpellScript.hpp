@@ -12,4 +12,6 @@ public:
 private:
 	Vec2 m_dir;
 	float m_Speed;
+
+	std::set<Entity> CheckCollision();
 };

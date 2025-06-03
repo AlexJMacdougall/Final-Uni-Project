@@ -60,7 +60,7 @@ void PlayerController::update(float dt)
 			m_RegistryPtr->GetComponent<Sprite>(m_SpellcastingOverlay)->hide = true;
 			for (Entity entity : m_KnownSpellWords) { m_RegistryPtr->GetComponent<ScriptComponent>(entity)->GetScript<SpellWordScript>()->SetActive(false); }
 
-			if (m_CurrentSpell.size() == 3) { CastSpell(); }
+			if (m_CurrentSpell.size() == 3) { CreateSpellEntitiy(); }
 		}
 	}
 
@@ -138,7 +138,7 @@ void PlayerController::RemoveSpellWord(Entity word)
 	m_CurrentSpell.erase(word);
 }
 
-void PlayerController::CastSpell()
+void PlayerController::CreateSpellEntitiy()
 {
 	std::vector<Entity> spellWords;
 
@@ -165,6 +165,8 @@ void PlayerController::CastSpell()
 	m_RegistryPtr->GetComponent<Sprite>(spell)->hide = false;
 	m_RegistryPtr->GetComponent<Sprite>(spell)->Layer = 1;
 	m_RegistryPtr->AddComponent<ScriptComponent>(spell,ScriptComponent());
+	m_RegistryPtr->AddComponent<BoxCollider>(spell, BoxCollider{ 24.0f,24.0f });
+
 	SpellScript* spellScript = new SpellScript(spell, m_RegistryPtr, Vec2{ xDir, yDir });
 	m_RegistryPtr->GetComponent<ScriptComponent>(spell)->attachScript<SpellScript>(*spellScript);
 

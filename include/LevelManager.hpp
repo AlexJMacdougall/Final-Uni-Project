@@ -66,13 +66,13 @@ public:
 	LevelManager::LevelManager();
 
 	void LevelManager::GenerateLevel(int steps);
-	Vec2 LevelManager::GetCurrentPos();
+	Vec2* LevelManager::GetCurrentPos();
 	void LevelManager::Move(std::string dir);
 	void SetPlayer(Entity player);
 	void SetReigstryPtr(Registry* registryPtr);
 
 	bool LevelManager::CheckForRoom(Vec2 pos);
-	int LevelManager::GetRoomID(Vec2 pos);
+	Entity LevelManager::GetRoomAtPos(Vec2 pos);
 
 	void LoadCurrentRoom();
 
@@ -84,7 +84,7 @@ private:
 	Entity m_PlayerEntity;
 
 	//Vector of room templates
-	std::vector<RoomTemplate> m_Rooms;
+	std::set<Entity> m_Rooms;
 	//Current room position
 	Vec2 m_CurrentPos;
 	//Set of all entities that make up current room - used for deletion later

@@ -42,6 +42,7 @@ int main()
 	REGISTRY.RegisterComponent<SphereCollider>();
 	REGISTRY.RegisterComponent<BoxCollider>();
 	REGISTRY.RegisterComponent<ScriptComponent>();
+	REGISTRY.RegisterComponent<RoomTemplate>();
 
 	SystemManager SYSTEM(&REGISTRY, 1280, 720);
 

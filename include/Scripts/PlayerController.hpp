@@ -23,7 +23,7 @@ public:
 	void AddSpellWord(Entity newWord);
 	void RemoveSpellWord(Entity word);
 
-	void CastSpell();
+	void CreateSpellEntitiy();
 
 	float m_slowdown;
 private:
