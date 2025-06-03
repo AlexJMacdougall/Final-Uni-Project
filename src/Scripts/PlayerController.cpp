@@ -165,6 +165,8 @@ void PlayerController::CastSpell()
 	m_RegistryPtr->GetComponent<Sprite>(spell)->hide = false;
 	m_RegistryPtr->GetComponent<Sprite>(spell)->Layer = 1;
 	m_RegistryPtr->AddComponent<ScriptComponent>(spell,ScriptComponent());
+	SpellScript* spellScript = new SpellScript(spell, m_RegistryPtr, Vec2{ xDir, yDir });
+	m_RegistryPtr->GetComponent<ScriptComponent>(spell)->attachScript<SpellScript>(*spellScript);
 
 	std::cout << spellWords[0] << " " << spellWords[1] << " " << spellWords[2] << std::endl;
 }

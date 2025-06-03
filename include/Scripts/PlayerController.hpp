@@ -2,6 +2,7 @@
 
 #include "Components/ScriptComponent.hpp"
 #include "Scripts/SpellWordScript.hpp"
+#include "Scripts/SpellScript.hpp"
 #include "Registry.hpp"
 
 //using Entity = uint32_t;

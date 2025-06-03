@@ -10,7 +10,7 @@ Vec2 Vec2Minus(Vec2 v1, Vec2 v2)
     return Vec2{ v1.x - v2.x, v1.y - v2.y };
 }
 
-Vec2 Vec2MultiplyInt(Vec2 vec, int multi)
+Vec2 Vec2MultiplyFloat(Vec2 vec, float multi)
 {
     return Vec2{ vec.x * multi,vec.y * multi };
 }

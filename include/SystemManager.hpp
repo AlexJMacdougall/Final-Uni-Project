@@ -9,6 +9,7 @@
 #include "LevelManager.hpp"
 #include "Registry.hpp"
 #include "Components/ScriptComponent.hpp"
+#include "Components/Vec2.hpp"
 #include "Scripts/SpellWordScript.hpp"
 #include "Scripts/DoorScript.hpp"
 

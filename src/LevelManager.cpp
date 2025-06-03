@@ -16,7 +16,6 @@ void LevelManager::GenerateLevel(int targetRoomNum)
 
 	Vec2 currentPos = {0,0};
 	Vec2 newPos;
-	int connectionDir;
 
 	srand(time(NULL));
 

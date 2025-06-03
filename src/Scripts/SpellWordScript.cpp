@@ -1,4 +1,4 @@
-#include "Components/SpellWordScript.hpp"
+#include "Scripts/SpellWordScript.hpp"
 
 SpellWordScript::SpellWordScript(Entity attachedEntity, Registry* registryPtr,Entity player,Camera2D* camera,SpellWordData data) :
 	Script(attachedEntity, registryPtr),

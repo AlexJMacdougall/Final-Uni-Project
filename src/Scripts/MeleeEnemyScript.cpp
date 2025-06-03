@@ -198,8 +198,6 @@ std::list<Entity> MeleeEnemyScript::Search(Entity targetEntity, Entity currentNa
 {
 	if (iter > max_Iterations) { return std::list<Entity>{}; }
 
-	Entity nextEntity;
-	Vec2 nextPosition;
 	Vec2 currentPos = m_RegistryPtr->GetComponent<Navmesh>(currentNavmeshPoint)->pos;
 
 	std::list<Entity> path;
