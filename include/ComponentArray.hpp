@@ -25,7 +25,6 @@ public:
 	void AddComponent(Entity entity,T component)
 	{
 		//Check the componentarray of type T exists
-		//If you fail this assertion you have attempted to add a component without registering that components type
 		assert(this != nullptr);
 
 		size_t newIndex = mSize;
@@ -37,16 +36,15 @@ public:
 
 		mSize += 1;
 
-		//DEBUG
-		if ((std::string)typeid(T).name() == (std::string)("class ScriptComponent"))
+		/*//DEBUG
+		std::cout << "Addcomponent for entity "<< entity <<" at position " 
+			<< mSparseArray[entity] << " {" << std::endl;
+		for (int i = 0; i < mSize; i++)
 		{
-			std::cout << "Addcomponent for entity " << entity <<" at position " << mSparseArray[entity] << " {" << std::endl;
-			for (int i = 0; i < mSize; i++)
-			{
-				std::cout <<i<<") " << typeid(mComponentArray[i]).name() << std::endl;
-			}
-			std::cout << "}" << std::endl;
+			std::cout <<i<<") " << typeid(mComponentArray[i]).name() << std::endl;
 		}
+		std::cout << "}" << std::endl;
+		*/
 	}
 
 	void RemoveComponent(Entity entity) override
@@ -74,18 +72,18 @@ public:
 		//Set sparseArray of removed entity to 0 to avoid finding
 		mSparseArray[entity] = 0;
 
-		//DEBUG
-		if ((std::string)typeid(T).name() == (std::string)("class ScriptComponent"))
+		/*//DEBUG
+		std::cout << "RemoveComponent for entity " << entity << std::endl;
+		std::cout << "Entity " << entityOfLastComponent << "'s component moved from pos " 
+			<< indexOfLastComponent << " to " << indexOfRemovedComponent << std::endl;
+		std::cout << "SparseArray location " << entityOfLastComponent << " is now "
+			<< mSparseArray[entityOfLastComponent] << "{" << std::endl;
+		for (int i = 0; i < mSize; i++)
 		{
-			std::cout << "RemoveComponent for entity " << entity << std::endl;
-			std::cout << "Entity " << entityOfLastComponent << "'s component moved from pos " << indexOfLastComponent << " to " << indexOfRemovedComponent << std::endl;
-			std::cout << "SparseArray location " << entityOfLastComponent << " is now " << mSparseArray[entityOfLastComponent] << "{" << std::endl;
-			for (int i = 0; i < mSize; i++)
-			{
-				std::cout << typeid(mComponentArray[i]).name() << std::endl;
-			}
-			std::cout << "}" << std::endl;
+			std::cout << typeid(mComponentArray[i]).name() << std::endl;
 		}
+		std::cout << "}" << std::endl;
+		*/
 	}
 
 	T* GetComponent(Entity entity) 

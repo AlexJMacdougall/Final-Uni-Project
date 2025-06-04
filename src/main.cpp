@@ -43,7 +43,7 @@ int main()
 	REGISTRY.RegisterComponent<BoxCollider>();
 	REGISTRY.RegisterComponent<ScriptComponent>();
 	REGISTRY.RegisterComponent<RoomTemplate>();
-
+	
 	SystemManager SYSTEM(&REGISTRY, 1280, 720);
 
 	// game loop

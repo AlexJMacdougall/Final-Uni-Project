@@ -72,6 +72,8 @@ inline void Registry::AddComponent(Entity entity,T component)
 {
 	const char* typeName = typeid(T).name();
 
+	assert(!m_Signatures->at(entity).test(m_typenameToComponentTypes[typeName]));
+
 	GetComponentArray<T>()->AddComponent(entity,component);
 
 	//Update entity signature
@@ -82,6 +84,8 @@ template<typename T>
 inline void Registry::RemoveComponent(Entity entity)
 {
 	const char* typeName = typeid(T).name();
+
+	assert(m_Signatures->at(entity).test(m_typenameToComponentTypes[typeName]));
 
 	GetComponentArray<T>()->RemoveComponent(entity);
 
