@@ -74,6 +74,7 @@ public:
 	bool LevelManager::CheckForRoom(Vec2 pos);
 	Entity LevelManager::GetRoomAtPos(Vec2 pos);
 
+	void UpdateCurrentRoom();
 	void LoadCurrentRoom();
 
 	std::set<Entity> GetDoorEntities();
@@ -91,6 +92,8 @@ private:
 	std::set<Entity> m_CurrentRoomEntities;
 	//Contains the current room's door entities - used to check if they have been interacted with
 	std::set<Entity> m_CurrentRoomDoorEntities;
+	//Contains the current room's door entities - used to check if they have been killed
+	std::set<Entity> m_CurrentRoomEnemies;
 
 	std::map<std::string, Vec2> directionVectors = {
 	{"Down",Vec2{0,1}},

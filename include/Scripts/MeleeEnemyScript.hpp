@@ -18,6 +18,8 @@ public:
 	void update(float dt) override;
 
 	void ApplyDamage(float damage);
+
+	bool CheckIfDead();
 private:
 	Entity m_PlayerEntity;
 

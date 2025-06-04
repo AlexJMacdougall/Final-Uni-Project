@@ -17,6 +17,7 @@ struct SphereCollider
 {
 	float radius;
 	int layer = 0;
+	bool checkPerFrame = false; //If true, collision is checked each frame. Should set to true in constructor of scripts that need collision data
 };
 
 struct BoxCollider
@@ -24,6 +25,7 @@ struct BoxCollider
 	float width;
 	float height;
 	int layer = 0;
+	bool checkPerFrame = false; //If true, collision is checked each frame. Should set to true in constructor of scripts that need collision data
 };
 
 struct RoomTemplate {

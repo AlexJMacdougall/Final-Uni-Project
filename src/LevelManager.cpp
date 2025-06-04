@@ -21,8 +21,9 @@ void LevelManager::GenerateLevel(int targetRoomNum)
 	srand(time(NULL));
 
 	//Create starting room, always template 0
-	Entity startRoom = m_RegistryPtr->CreateEntity();
-	m_RegistryPtr->AddComponent<RoomTemplate>(startRoom, { 0,currentPos });
+	Entity newRoom = m_RegistryPtr->CreateEntity();
+	m_RegistryPtr->AddComponent<RoomTemplate>(newRoom, { 0,currentPos });
+	m_Rooms.insert(newRoom);
 	int numOfRooms = 1;
 
 	while(numOfRooms<targetRoomNum)
@@ -37,7 +38,7 @@ void LevelManager::GenerateLevel(int targetRoomNum)
 		if(!CheckForRoom(newPos))
 		{
 			int roomID = rand() % NUM_OF_ROOM_TEMPLATES;
-			Entity newRoom = m_RegistryPtr->CreateEntity();
+			newRoom = m_RegistryPtr->CreateEntity();
 			m_RegistryPtr->AddComponent<RoomTemplate>(newRoom, { roomID,currentPos });
 			m_Rooms.insert(newRoom);
 			numOfRooms += 1;
@@ -106,6 +107,23 @@ Entity LevelManager::GetRoomAtPos(Vec2 pos)
 	}
 }
 
+void LevelManager::UpdateCurrentRoom()
+{
+	//Check for any enemies that have been killed
+
+	std::set<Entity> currentRoomEnemies = m_CurrentRoomEnemies;
+
+	for(Entity enemy : currentRoomEnemies)
+	{
+		if(m_RegistryPtr->GetComponent<ScriptComponent>(enemy)->GetScript<MeleeEnemyScript>()->CheckIfDead())
+		{
+			m_RegistryPtr->DestroyEntity(enemy);
+			m_CurrentRoomEntities.erase(enemy);
+			m_CurrentRoomEnemies.erase(enemy);
+		}
+	}
+}
+
 void LevelManager::LoadCurrentRoom()
 {
 	//Clear old room entities
@@ -114,11 +132,10 @@ void LevelManager::LoadCurrentRoom()
 		m_RegistryPtr->DestroyEntity(entity); 
 	}
 	m_CurrentRoomEntities = {};
+	m_CurrentRoomEnemies = {};
 	m_CurrentRoomDoorEntities = {};
 
 	auto templateID = m_RegistryPtr->GetComponent<RoomTemplate>(GetRoomAtPos(m_CurrentPos))->templateID;
-
-	std::cout << templateID << std::endl;
 
 	auto roomTextureMap = ROOM_TEMPLATES[templateID];
 
@@ -184,7 +201,9 @@ void LevelManager::Build(int id, int x, int y,Vec2 size)
 
 Entity LevelManager::SpawnEnemy(int x, int y)
 {
-	Entity enemy = m_RegistryPtr->CreateEntity();
+	Entity enemy = m_RegistryPtr->CreateEntity("Enemy");
+
+	m_CurrentRoomEnemies.insert(enemy);
 
 	m_RegistryPtr->AddComponent<Transform2D>(enemy, Transform2D{ Vec2{300,300},Vec2{1,1} });
 	m_RegistryPtr->AddComponent<BoxCollider>(enemy, BoxCollider{ 32.0f,32.0f });
@@ -239,5 +258,4 @@ void LevelManager::SpawnDoor(int x, int y,Vec2 size)
 	{
 		Build(2, x, y, size);
 	}
-	std::cout << "Leaving scope for door" << std::endl;
 }

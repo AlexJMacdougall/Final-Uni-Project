@@ -38,9 +38,7 @@ void MeleeEnemyScript::update(float dt)
 
 	switch (m_CurrentState)
 	{
-	case Dead:
-		std::cout << "Enemy " << m_AttachedEntity << " is dead" << std::endl;
-		m_RegistryPtr->DestroyEntity(m_AttachedEntity);
+	case Dead:	
 		break;
 
 	case Idle:
@@ -148,6 +146,12 @@ void MeleeEnemyScript::ApplyDamage(float damage)
 	m_Health -= damage;
 }
 
+bool MeleeEnemyScript::CheckIfDead()
+{
+	if (m_CurrentState == Dead) { return true; }
+	return false;
+}
+
 void MeleeEnemyScript::Move_Towards(Vec2 target,float dt)
 {
 	auto pos = m_RegistryPtr->GetComponent<Transform2D>(m_AttachedEntity);
@@ -186,12 +190,6 @@ void MeleeEnemyScript::Get_Path(Entity target)
 			break;
 		}
 	}
-
-
-	//DEBUG ////////////// REMOVE
-	//for (Entity entity : path) { std::cout << "Entity " << entity << std::endl; }
-	//m_CurrentState = Dead;
-	//DEBUG ////////////// REMOVE
 }
 
 std::list<Entity> MeleeEnemyScript::Search(Entity targetEntity, Entity currentNavmeshPoint,std::set<Entity> searchedPositions,int iter)

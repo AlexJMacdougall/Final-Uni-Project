@@ -72,12 +72,17 @@ void SystemManager::Update(float dt)
 		//Run entity scripts
 		this->RunScripts(dt * m_Slowdown);
 
+		m_LevelManager.UpdateCurrentRoom();
+
 		//Check if the door entities have been interacted with
 		for (Entity door : m_LevelManager.GetDoorEntities())
 		{
 			DoorScript* doorScript = m_RegistryPtr->GetComponent<ScriptComponent>(door)->GetScript<DoorScript>();
 			if (doorScript->playerHasInteracted())
 			{
+
+				m_RegistryPtr->GetComponent<ScriptComponent>(m_PlayerEntity)->GetScript<PlayerController>()->EnterNewRoom();
+
 				std::string movedDirection = doorScript->GetDirection();
 
 				m_LevelManager.Move(movedDirection);
@@ -327,13 +332,11 @@ void SystemManager::ResetGame()
 
 	ScriptComponent playerScript = ScriptComponent();
 	playerScript.attachScript<PlayerController>(*playerController);
-	std::cout << "Created playerScript and Controller" << std::endl;
 	m_RegistryPtr->AddComponent<ScriptComponent>(m_PlayerEntity, playerScript);
 
 	m_LevelManager.SetPlayer(m_PlayerEntity);
 	m_LevelManager.GenerateLevel(10);
 	m_LevelManager.LoadCurrentRoom();
-	std::cout << "Leaving scope for player" << std::endl;
 }
 
 void SystemManager::CreateSpellWord(Vec2 UV,SpellWordData data)

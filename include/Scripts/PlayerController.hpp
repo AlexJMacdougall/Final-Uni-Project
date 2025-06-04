@@ -22,6 +22,9 @@ public:
 	void AddLearnedSpellWord(Entity newWord);
 	void AddSpellWord(Entity newWord);
 	void RemoveSpellWord(Entity word);
+	//Function that the system manager can call on the player when entering a new room
+	void EnterNewRoom();
+	void RemoveInternalEntity(Entity entity);
 
 	void CreateSpellEntitiy();
 
@@ -32,6 +35,8 @@ private:
 	Registry* m_RegistryPtr;
 
 	std::set<Entity> m_CurrentSpell;
+
+	std::set<Entity> m_ActiveSpells;
 
 	std::set<Entity> CheckCollision();
 

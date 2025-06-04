@@ -101,7 +101,6 @@ void PlayerController::Damage()
 	{
 		m_health -= 1;
 		hitTimer = 0.3f;
-		std::cout << "Damaged" << std::endl;
 	}
 }
 
@@ -138,13 +137,29 @@ void PlayerController::RemoveSpellWord(Entity word)
 	m_CurrentSpell.erase(word);
 }
 
+void PlayerController::EnterNewRoom()
+{
+	//Clear active spells when entering a new room, and remove them from Internal entities to prevent trying to destroy them later
+	for(Entity entity : m_ActiveSpells) 
+	{
+		RemoveInternalEntity(entity);
+	}
+	m_ActiveSpells = {};
+}
+
+void PlayerController::RemoveInternalEntity(Entity entity)
+{
+	m_RegistryPtr->DestroyEntity(entity);
+	m_InternalEntities.erase(entity);
+}
+
 void PlayerController::CreateSpellEntitiy()
 {
 	std::vector<Entity> spellWords;
 
 	for (Entity word : m_CurrentSpell) { spellWords.push_back(word); }
 
-	Entity spell = m_RegistryPtr->CreateEntity();
+	Entity spell = m_RegistryPtr->CreateEntity("Spell");
 	m_InternalEntities.insert(spell);
 
 	float spellStartingOffset = 40.0f;
@@ -170,7 +185,10 @@ void PlayerController::CreateSpellEntitiy()
 	SpellScript* spellScript = new SpellScript(spell, m_RegistryPtr, Vec2{ xDir, yDir });
 	m_RegistryPtr->GetComponent<ScriptComponent>(spell)->attachScript<SpellScript>(*spellScript);
 
-	std::cout << spellWords[0] << " " << spellWords[1] << " " << spellWords[2] << std::endl;
+	//Insert into active spells to destroy on entering new room
+	m_ActiveSpells.insert(spell);
+	//Insert into internal entities to destroy if the player dies
+	m_InternalEntities.insert(spell);
 }
 
 std::set<Entity> PlayerController::CheckCollision()

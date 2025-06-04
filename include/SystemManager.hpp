@@ -39,7 +39,7 @@ public:
 
 	Camera2D* GetCamera();
 
-	template<typename t>
+	template<typename T>
 	std::set<Entity> CheckCollision(Entity entity);
 
 private:
@@ -106,6 +106,7 @@ inline std::set<Entity> SystemManager::CheckCollision(Entity checkEntity)
 			}
 		}
 	}
+
 	else if (typeid(t) == typeid(BoxCollider))
 	{
 		//Box to box collision

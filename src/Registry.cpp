@@ -13,7 +13,7 @@ Registry::Registry()
 	mNextComponentType = 0;
 }
 
-Entity Registry::CreateEntity()
+Entity Registry::CreateEntity(std::string tag)
 {
 	//Check if there is a available entity 
 	//If you failed this assertion you ran out of availabile entity IDs. Either increase the maximum or check if you are creating entities that dont get destroyed when they should
@@ -24,6 +24,8 @@ Entity Registry::CreateEntity()
 
 	//Add entity to active entity set
 	m_ActiveEntities.insert(entity);
+
+	m_Tags->at(entity) = tag;
 
 	m_EntityCount += 1;
 	return entity;
@@ -52,6 +54,7 @@ void Registry::DestroyEntity(Entity entity)
 	//Push entity to back of available entity queue and reset signature
 	m_AvailableEntities.push(entity);
 	m_Signatures->at(entity) = Signature{ 0 };
+	m_Tags->at(entity) = "";
 
 	m_EntityCount -= 1;
 }
@@ -59,4 +62,9 @@ void Registry::DestroyEntity(Entity entity)
 Signature Registry::GetSignature(Entity entity)
 {
 	return m_Signatures->at(entity);
+}
+
+std::string Registry::GetTag(Entity entity)
+{
+	return m_Tags->at(entity);
 }

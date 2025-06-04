@@ -17,7 +17,7 @@ class Registry {
 public:
 	Registry();
 	//Returns new Entity
-	Entity CreateEntity();
+	Entity CreateEntity(std::string tag = "");
 	//Destroys an entity and its components
 	void DestroyEntity(Entity ID);
 
@@ -39,6 +39,8 @@ public:
 	//Getters
 	Signature GetSignature(Entity entity);
 
+	std::string GetTag(Entity entity);
+
 	template<typename T>
 	T* GetComponent(Entity entity);
 
@@ -52,6 +54,7 @@ private:
 
 	//Holds entity signatures that keep track of what components it has
 	std::array<Signature, MAX_ENTITIES>* m_Signatures = new std::array<Signature, MAX_ENTITIES>;
+	std::array<std::string, MAX_ENTITIES>* m_Tags = new std::array<std::string, MAX_ENTITIES>;
 
 	//Map from typeName to componentArray - holds all component data
 	std::unordered_map<const char*, std::shared_ptr<IComponentArray>> m_ComponentArrays;
@@ -83,7 +86,7 @@ inline void Registry::RemoveComponent(Entity entity)
 	GetComponentArray<T>()->RemoveComponent(entity);
 
 	//Update entity signature
-	m_Signatures->at(Entity).set(m_ComponentTypes[typeName], false);
+	m_Signatures->at(entity).set(m_typenameToComponentTypes[typeName], false);
 }
 
 template<typename T>

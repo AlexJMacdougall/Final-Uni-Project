@@ -13,9 +13,24 @@ void SpellScript::update(float dt)
 
 	m_RegistryPtr->GetComponent<Transform2D>(m_AttachedEntity)->position = Vec2Add(pos, Vec2MultiplyFloat(m_dir, dt * m_Speed));
 
-	if(CheckCollision().size() != 0)
+	std::set<Entity> collidingEntities;
+
+	if (testCollision) { collidingEntities = CheckCollision(); }
+
+	if(collidingEntities.size() != 0)
 	{
-		//m_RegistryPtr->DestroyEntity(m_AttachedEntity);
+		//Remove components so entity cant interact, will be deleted later
+		testCollision = false;
+		m_RegistryPtr->RemoveComponent<Sprite>(m_AttachedEntity);
+		m_RegistryPtr->RemoveComponent<BoxCollider>(m_AttachedEntity);
+
+		for(Entity collidingEntity : collidingEntities)
+		{
+			if(m_RegistryPtr->GetTag(collidingEntity) == "Enemy")
+			{
+				m_RegistryPtr->GetComponent<ScriptComponent>(collidingEntity)->GetScript<MeleeEnemyScript>()->ApplyDamage(m_Damage);
+			}
+		}
 	}
 }
 

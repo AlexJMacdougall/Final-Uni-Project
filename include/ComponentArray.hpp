@@ -37,7 +37,7 @@ public:
 
 		mSize += 1;
 
-		/*//DEBUG
+		//DEBUG
 		if ((std::string)typeid(T).name() == (std::string)("class ScriptComponent"))
 		{
 			std::cout << "Addcomponent for entity " << entity <<" at position " << mSparseArray[entity] << " {" << std::endl;
@@ -47,7 +47,6 @@ public:
 			}
 			std::cout << "}" << std::endl;
 		}
-		*/
 	}
 
 	void RemoveComponent(Entity entity) override
@@ -75,7 +74,7 @@ public:
 		//Set sparseArray of removed entity to 0 to avoid finding
 		mSparseArray[entity] = 0;
 
-		/*//DEBUG
+		//DEBUG
 		if ((std::string)typeid(T).name() == (std::string)("class ScriptComponent"))
 		{
 			std::cout << "RemoveComponent for entity " << entity << std::endl;
@@ -86,7 +85,7 @@ public:
 				std::cout << typeid(mComponentArray[i]).name() << std::endl;
 			}
 			std::cout << "}" << std::endl;
-		}*/
+		}
 	}
 
 	T* GetComponent(Entity entity) 
