@@ -21,6 +21,10 @@ public:
 	{
 		mSize = 1;
 	}
+	~ComponentArray()
+	{
+		std::cout << typeid(T).name() << std::endl;
+	}
 
 	void AddComponent(Entity entity,T component)
 	{

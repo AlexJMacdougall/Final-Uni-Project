@@ -43,16 +43,18 @@ int main()
 	REGISTRY.RegisterComponent<BoxCollider>();
 	REGISTRY.RegisterComponent<ScriptComponent>();
 	REGISTRY.RegisterComponent<RoomTemplate>();
-	
+
 	SystemManager SYSTEM(&REGISTRY, 1280, 720);
 
+
+	
 	// game loop
 	while (!WindowShouldClose())		// run the loop untill the user presses ESCAPE or presses the Close button on the window
 	{
 		float dt = GetFrameTime();
 		SYSTEM.Update(dt);
 	}
-
+	
 	// destroy the window and cleanup the OpenGL context
 	CloseWindow();
 	return 0;

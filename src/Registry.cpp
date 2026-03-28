@@ -13,6 +13,17 @@ Registry::Registry()
 	mNextComponentType = 0;
 }
 
+Registry::~Registry()
+{
+	/*
+	std::cout << "Here" << std::endl;
+	for (int i = 0; i < mNextComponentType; i++) 
+	{ 
+		delete &m_ComponentArrays[m_componentTypesToTypename[i]];
+	}
+	*/
+}
+
 Entity Registry::CreateEntity(std::string tag)
 {
 	//Check if there is a available entity 

@@ -16,6 +16,7 @@ using Signature = std::bitset<MAX_COMPONENTS>;
 class Registry {
 public:
 	Registry();
+	~Registry();
 	//Returns new Entity
 	Entity CreateEntity(std::string tag = "");
 	//Destroys an entity and its components
